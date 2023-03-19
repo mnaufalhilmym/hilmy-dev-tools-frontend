@@ -1,35 +1,35 @@
 import { gql } from "@apollo/client/core";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { createRenderEffect, createSignal, Show } from "solid-js";
-import GqlClient from "../../api/gqlClient";
-import LoadingSpinner from "../../components/loading/LoadingSpinner";
-import PlainTextField from "../../components/form/PlainTextField";
-import SiteHead from "../../data/siteHead";
-import SitePath from "../../data/sitePath";
-import showGqlError from "../../helpers/showGqlError";
-import ConfirmButton from "../../components/button/ConfirmButton";
-import toast from "solid-toast";
+import GqlClient from "../../../api/gqlClient";
+import ConfirmButton from "../../../components/button/ConfirmButton";
+import PlainTextField from "../../../components/form/PlainTextField";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
+import SiteHead from "../../../data/siteHead";
+import SitePath from "../../../data/sitePath";
+import showGqlError from "../../../helpers/showGqlError";
 
-export default function SignUpVerifyScreen() {
+export default function VerifyRequestResetPasswordScreen() {
   const gqlClient = GqlClient.client;
   const navigate = useNavigate();
   const [params, _] = useSearchParams<{ email?: string }>();
-  const [isLoadingVerifySignUp, setIsLoadingVerifySignUp] = createSignal(false);
+  const [isLoadingVerifyResetPassword, setIsLoadingVerifyResetPassword] =
+    createSignal(false);
 
   createRenderEffect(() => {
     if (!params.email) {
-      navigate(SitePath.signUpPath, { replace: true });
+      navigate(SitePath.requestResetPasswordPath, { replace: true });
       return;
     }
 
-    SiteHead.title = "Sign Up Verification";
+    SiteHead.title = "Reset Password Verification";
   });
 
   function back() {
-    navigate(SitePath.signUpPath, { replace: true });
+    navigate(SitePath.requestResetPasswordPath, { replace: true });
   }
 
-  async function verifySignUp(
+  async function verifyResetPassword(
     event: Event & {
       submitter: HTMLElement;
     } & {
@@ -39,21 +39,24 @@ export default function SignUpVerifyScreen() {
   ) {
     event.preventDefault();
 
-    if (isLoadingVerifySignUp()) return;
+    if (isLoadingVerifyResetPassword()) return;
 
     const target = event.target as typeof event.target & {
       code: { value: string };
     };
 
     try {
-      setIsLoadingVerifySignUp(true);
+      setIsLoadingVerifyResetPassword(true);
 
       const result = await gqlClient.mutate<{
-        verifySignUp: { isSuccess: boolean };
+        verifyRequestResetPassword: { isSuccess: boolean };
       }>({
         mutation: gql`
-          mutation VerifySignUp($email: String!, $verifyCode: String!) {
-            verifySignUp(email: $email, verifyCode: $verifyCode) {
+          mutation VerifyRequestResetPassword(
+            $email: String!
+            $verifyCode: String!
+          ) {
+            verifyRequestResetPassword(email: $email, verifyCode: $verifyCode) {
               isSuccess
             }
           }
@@ -64,14 +67,18 @@ export default function SignUpVerifyScreen() {
         },
       });
 
-      if (!result.data?.verifySignUp.isSuccess) throw result.errors;
+      if (!result.data?.verifyRequestResetPassword.isSuccess)
+        throw result.errors;
 
-      toast.success("Account verified");
-      navigate(SitePath.signInPath, { replace: true });
+      navigate(
+        `${
+          SitePath.resetPasswordPath
+        }?email=${params.email!.toLowerCase()}&code=${target.code.value}`
+      );
     } catch (e) {
       showGqlError(e);
     } finally {
-      setIsLoadingVerifySignUp(false);
+      setIsLoadingVerifyResetPassword(false);
     }
   }
 
@@ -79,9 +86,9 @@ export default function SignUpVerifyScreen() {
     <div class="min-w-screen min-h-screen flex items-center">
       <div class="w-full max-w-md mx-auto p-10 border-2 rounded-lg">
         <div>
-          <h1 class="text-2xl text-center">Verify your email</h1>
+          <h1 class="text-2xl text-center">Reset password verification</h1>
         </div>
-        <form onsubmit={verifySignUp} class="mt-6">
+        <form onsubmit={verifyResetPassword} class="mt-6">
           <div>
             <div>
               <span>
@@ -108,7 +115,7 @@ export default function SignUpVerifyScreen() {
             </button>
             <ConfirmButton type="submit">
               <Show
-                when={!isLoadingVerifySignUp()}
+                when={!isLoadingVerifyResetPassword()}
                 fallback={
                   <div class="p-0.5">
                     <LoadingSpinner />

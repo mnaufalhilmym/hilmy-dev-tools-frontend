@@ -10,26 +10,26 @@ import showGqlError from "../../helpers/showGqlError";
 import ConfirmButton from "../../components/button/ConfirmButton";
 import toast from "solid-toast";
 
-export default function SignUpVerifyScreen() {
+export default function EmailVerifyScreen() {
   const gqlClient = GqlClient.client;
   const navigate = useNavigate();
   const [params, _] = useSearchParams<{ email?: string }>();
-  const [isLoadingVerifySignUp, setIsLoadingVerifySignUp] = createSignal(false);
+  const [isLoadingVerifyEmail, setIsLoadingVerifyEmail] = createSignal(false);
 
   createRenderEffect(() => {
     if (!params.email) {
-      navigate(SitePath.signUpPath, { replace: true });
+      navigate(SitePath.emailPath, { replace: true });
       return;
     }
 
-    SiteHead.title = "Sign Up Verification";
+    SiteHead.title = "Email Verification";
   });
 
   function back() {
-    navigate(SitePath.signUpPath, { replace: true });
+    navigate(SitePath.emailPath, { replace: true });
   }
 
-  async function verifySignUp(
+  async function verifyEmail(
     event: Event & {
       submitter: HTMLElement;
     } & {
@@ -39,39 +39,39 @@ export default function SignUpVerifyScreen() {
   ) {
     event.preventDefault();
 
-    if (isLoadingVerifySignUp()) return;
+    if (isLoadingVerifyEmail()) return;
 
     const target = event.target as typeof event.target & {
       code: { value: string };
     };
 
     try {
-      setIsLoadingVerifySignUp(true);
+      setIsLoadingVerifyEmail(true);
 
       const result = await gqlClient.mutate<{
-        verifySignUp: { isSuccess: boolean };
+        verifyChangeEmail: { isSuccess: boolean };
       }>({
         mutation: gql`
-          mutation VerifySignUp($email: String!, $verifyCode: String!) {
-            verifySignUp(email: $email, verifyCode: $verifyCode) {
+          mutation VerifyChangeEmail($newEmail: String!, $verifyCode: String!) {
+            verifyChangeEmail(newEmail: $newEmail, verifyCode: $verifyCode) {
               isSuccess
             }
           }
         `,
         variables: {
-          email: params.email!.toLowerCase(),
+          newEmail: params.email!.toLowerCase(),
           verifyCode: target.code.value,
         },
       });
 
-      if (!result.data?.verifySignUp.isSuccess) throw result.errors;
+      if (!result.data?.verifyChangeEmail.isSuccess) throw result.errors;
 
-      toast.success("Account verified");
-      navigate(SitePath.signInPath, { replace: true });
+      toast.success("Email changed");
+      navigate(`${SitePath.homePath}?invalidate=true`, { replace: true });
     } catch (e) {
       showGqlError(e);
     } finally {
-      setIsLoadingVerifySignUp(false);
+      setIsLoadingVerifyEmail(false);
     }
   }
 
@@ -81,7 +81,7 @@ export default function SignUpVerifyScreen() {
         <div>
           <h1 class="text-2xl text-center">Verify your email</h1>
         </div>
-        <form onsubmit={verifySignUp} class="mt-6">
+        <form onsubmit={verifyEmail} class="mt-6">
           <div>
             <div>
               <span>
@@ -108,7 +108,7 @@ export default function SignUpVerifyScreen() {
             </button>
             <ConfirmButton type="submit">
               <Show
-                when={!isLoadingVerifySignUp()}
+                when={!isLoadingVerifyEmail()}
                 fallback={
                   <div class="p-0.5">
                     <LoadingSpinner />

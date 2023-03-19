@@ -1,21 +1,22 @@
 import { gql } from "@apollo/client/core";
 import { Link, useNavigate } from "@solidjs/router";
 import { createRenderEffect, createSignal, Show } from "solid-js";
-import toast from "solid-toast";
 import GqlClient from "../../api/gqlClient";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import EmailTextField from "../../components/form/EmailTextField";
 import PasswordTextField from "../../components/form/PasswordTextField";
 import SiteHead from "../../data/siteHead";
 import SitePath from "../../data/sitePath";
+import showGqlError from "../../helpers/showGqlError";
+import ConfirmButton from "../../components/button/ConfirmButton";
 
 export default function SignUpScreen() {
-  const gqlClient = GqlClient.get();
+  const gqlClient = GqlClient.client;
   const navigate = useNavigate();
   const [isLoadingSignUp, setIsLoadingSignUp] = createSignal(false);
 
   createRenderEffect(() => {
-    SiteHead.setTitle("Sign Up");
+    SiteHead.title = "Sign Up";
   });
 
   async function signUp(
@@ -48,7 +49,7 @@ export default function SignUpScreen() {
             }
           `,
           variables: {
-            email: target.email.value,
+            email: target.email.value.toLowerCase(),
             password: target.password.value,
           },
         }
@@ -56,12 +57,11 @@ export default function SignUpScreen() {
 
       if (!result.data?.signUp.isSuccess) throw result.errors;
 
-      navigate(`${SitePath.verifySignUpPath}?email=${target.email.value}`);
+      navigate(
+        `${SitePath.verifySignUpPath}?email=${target.email.value.toLowerCase()}`
+      );
     } catch (e) {
-      if (import.meta.env.DEV) {
-        console.error(e);
-      }
-      toast.error(e?.toString());
+      showGqlError(e);
     } finally {
       setIsLoadingSignUp(false);
     }
@@ -69,18 +69,22 @@ export default function SignUpScreen() {
 
   return (
     <div class="min-w-screen min-h-screen flex items-center">
-      <div class="mx-auto p-10 border-2 rounded-lg">
-        <form onsubmit={signUp} class="min-w-[24rem]">
+      <div class="w-full max-w-md mx-auto p-10 border-2 rounded-lg">
+        <div>
+          <h1 class="text-2xl text-center">Sign up</h1>
+        </div>
+        <form onsubmit={signUp} class="mt-8">
           <div>
-            <h1 class="text-2xl text-center">Sign Up</h1>
-          </div>
-          <div class="mt-8">
             <div>
               <div>
-                <EmailTextField name="email" placeholder="Email" />
+                <EmailTextField name="email" placeholder="Email" required />
               </div>
               <div class="mt-2">
-                <PasswordTextField name="password" placeholder="Password" />
+                <PasswordTextField
+                  name="password"
+                  placeholder="Password"
+                  required
+                />
               </div>
             </div>
           </div>
@@ -91,14 +95,18 @@ export default function SignUpScreen() {
             >
               Sign in instead
             </Link>
-            <button
-              type="submit"
-              class="px-4 py-1.5 bg-teal-500 hover:bg-teal-600 active:bg-teal-700 hover:drop-shadow text-white rounded transition duration-200"
-            >
-              <Show when={!isLoadingSignUp()} fallback={<LoadingSpinner />}>
+            <ConfirmButton type="submit">
+              <Show
+                when={!isLoadingSignUp()}
+                fallback={
+                  <div class="p-0.5">
+                    <LoadingSpinner />
+                  </div>
+                }
+              >
                 Sign up
               </Show>
-            </button>
+            </ConfirmButton>
           </div>
         </form>
       </div>

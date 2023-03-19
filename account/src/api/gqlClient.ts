@@ -3,19 +3,17 @@ import {
   InMemoryCache,
   NormalizedCacheObject,
 } from "@apollo/client/core";
+import { getTokenFromCookie } from "../helpers/cookie";
 
 export default class GqlClient {
   private static _client: ApolloClient<NormalizedCacheObject>;
 
-  static async init() {
-    await this.update();
+  static init() {
+    this.update();
   }
 
-  static async update() {
-    const token = document.cookie
-      .split(";")
-      .find((row) => row.trim().startsWith("token"))
-      ?.split("=")?.[1];
+  static update() {
+    const token = getTokenFromCookie();
 
     this._client = new ApolloClient({
       uri: import.meta.env.VITE_GQL_ENDPOINT,
@@ -28,7 +26,7 @@ export default class GqlClient {
     });
   }
 
-  static get() {
+  static get client() {
     return this._client;
   }
 }

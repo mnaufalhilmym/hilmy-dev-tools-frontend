@@ -1,18 +1,22 @@
 import { gql } from "@apollo/client/core";
-import { Link } from "@solidjs/router";
+import { Link, useNavigate } from "@solidjs/router";
 import { createRenderEffect, createSignal } from "solid-js";
 import GqlClient from "../../api/gqlClient";
+import ConfirmButton from "../../components/button/ConfirmButton";
 import EmailTextField from "../../components/form/EmailTextField";
 import PasswordTextField from "../../components/form/PasswordTextField";
 import SiteHead from "../../data/siteHead";
 import SitePath from "../../data/sitePath";
+import { saveCookie } from "../../helpers/cookie";
+import showGqlError from "../../helpers/showGqlError";
 
 export default function SignInScreen() {
-  const gqlClient = GqlClient.get();
+  const gqlClient = GqlClient.client;
+  const navigate = useNavigate();
   const [isLoadingSignIn, setIsLoadingSignIn] = createSignal(false);
 
   createRenderEffect(() => {
-    SiteHead.setTitle("Sign In");
+    SiteHead.title = "Sign In";
   });
 
   async function signIn(
@@ -44,15 +48,20 @@ export default function SignInScreen() {
           }
         `,
         variables: {
-          email: target.email.value,
+          email: target.email.value.toLowerCase(),
           password: target.password.value,
         },
       });
 
       if (!result.data?.signIn.token) throw result.errors;
 
-      console.log(result.data.signIn.token);
+      saveCookie({ key: "token", value: result.data.signIn.token });
+
+      GqlClient.update();
+
+      navigate(SitePath.homePath, { replace: true });
     } catch (e) {
+      showGqlError(e);
     } finally {
       setIsLoadingSignIn(false);
     }
@@ -60,44 +69,45 @@ export default function SignInScreen() {
 
   return (
     <div class="min-w-screen min-h-screen flex items-center">
-      <div class="mx-auto p-10 border-2 rounded-lg">
-        <form onsubmit={signIn} class="min-w-[24rem]">
+      <div class="w-full max-w-md mx-auto p-10 border-2 rounded-lg">
+        <div class="min-w-[24rem]">
           <div>
-            <h1 class="text-2xl text-center">Sign In</h1>
+            <h1 class="text-2xl text-center">Sign in</h1>
           </div>
-          <div class="mt-8">
+          <form onsubmit={signIn} class="mt-8">
             <div>
               <div>
-                <EmailTextField name="email" placeholder="Email" />
+                <div>
+                  <EmailTextField name="email" placeholder="Email" required />
+                </div>
+                <div class="mt-2">
+                  <PasswordTextField
+                    name="password"
+                    placeholder="Password"
+                    required
+                  />
+                </div>
               </div>
-              <div class="mt-2">
-                <PasswordTextField name="password" placeholder="Password" />
+              <div class="mt-4">
+                <Link
+                  href={SitePath.requestResetPasswordPath}
+                  class="-ml-1 px-1 py-0.5 active:bg-teal-100 text-teal-500 active:text-teal-600 rounded"
+                >
+                  Reset password
+                </Link>
               </div>
             </div>
-            <div class="mt-4">
+            <div class="mt-10 -ml-1.5 flex items-center justify-between">
               <Link
-                href={SitePath.resetPasswordPath}
-                class="-ml-1 px-1 py-0.5 active:bg-teal-100 text-teal-500 active:text-teal-600 rounded"
+                href={SitePath.signUpPath}
+                class="px-1.5 py-1.5 text-teal-500 hover:text-teal-600 hover:bg-teal-50 active:bg-teal-100 rounded transition-colors duration-200"
               >
-                Reset password
+                Create account
               </Link>
+              <ConfirmButton type="submit">Sign in</ConfirmButton>
             </div>
-          </div>
-          <div class="mt-10 -ml-1.5 flex items-center justify-between">
-            <Link
-              href={SitePath.signUpPath}
-              class="px-1.5 py-1.5 text-teal-500 hover:text-teal-600 hover:bg-teal-50 active:bg-teal-100 rounded transition-colors duration-200"
-            >
-              Create account
-            </Link>
-            <button
-              type="submit"
-              class="px-4 py-1.5 bg-teal-500 hover:bg-teal-600 active:bg-teal-700 hover:drop-shadow text-white rounded transition duration-200"
-            >
-              Sign in
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

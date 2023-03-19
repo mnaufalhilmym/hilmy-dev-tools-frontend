@@ -3,6 +3,7 @@ import { Component, createRenderEffect, lazy } from "solid-js";
 import { Toaster } from "solid-toast";
 import GqlClient from "./api/gqlClient";
 import Head from "./components/head/Head";
+import { ModalWrapper } from "./components/modal/ModalWrapper";
 import SiteHead from "./data/siteHead";
 import SitePath from "./data/sitePath";
 import getLastScreenPath from "./helpers/getLastScreenPath";
@@ -10,6 +11,7 @@ import getLastScreenPath from "./helpers/getLastScreenPath";
 const routes: RouteDefinition[] = [
   {
     path: SitePath.homePath,
+    component: lazy(() => import("./screens/MainWrapper")),
     children: [
       {
         path: "/",
@@ -23,10 +25,36 @@ const routes: RouteDefinition[] = [
             component: lazy(() => import("./screens/signIn/SignInScreen")),
           },
           {
-            path: getLastScreenPath(SitePath.resetPasswordPath),
-            component: lazy(
-              () => import("./screens/signIn/resetPassword/ResetPasswordScreen")
-            ),
+            path: getLastScreenPath(SitePath.requestResetPasswordPath),
+            children: [
+              {
+                path: "/",
+                component: lazy(
+                  () =>
+                    import(
+                      "./screens/signIn/resetPassword/RequestResetPasswordScreen"
+                    )
+                ),
+              },
+              {
+                path: getLastScreenPath(
+                  SitePath.verifyRequestResetPasswordPath
+                ),
+                component: lazy(
+                  () =>
+                    import(
+                      "./screens/signIn/resetPassword/VerifyRequestResetPasswordScreen"
+                    )
+                ),
+              },
+              {
+                path: getLastScreenPath(SitePath.resetPasswordPath),
+                component: lazy(
+                  () =>
+                    import("./screens/signIn/resetPassword/ResetPasswordScreen")
+                ),
+              },
+            ],
           },
         ],
       },
@@ -45,6 +73,23 @@ const routes: RouteDefinition[] = [
           },
         ],
       },
+      {
+        path: getLastScreenPath(SitePath.passwordPath),
+        component: lazy(() => import("./screens/password/MainPasswordScreen")),
+      },
+      {
+        path: getLastScreenPath(SitePath.emailPath),
+        children: [
+          {
+            path: "/",
+            component: lazy(() => import("./screens/email/MainEmailScreen")),
+          },
+          {
+            path: getLastScreenPath(SitePath.verifyEmailPath),
+            component: lazy(() => import("./screens/email/VerifyEmailScreen")),
+          },
+        ],
+      },
     ],
   },
 ];
@@ -52,8 +97,9 @@ const routes: RouteDefinition[] = [
 const App: Component = () => {
   const Routes = useRoutes(routes);
 
-  createRenderEffect(async () => {
-    await Promise.all([GqlClient.init(), SiteHead.init()]);
+  createRenderEffect(() => {
+    SiteHead.init();
+    GqlClient.init();
   });
 
   return (
@@ -61,6 +107,7 @@ const App: Component = () => {
       <Head />
       <Routes />
       <Toaster position="top-right" gutter={8} />
+      <ModalWrapper />
     </>
   );
 };
