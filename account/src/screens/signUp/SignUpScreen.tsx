@@ -11,7 +11,6 @@ import showGqlError from "../../helpers/showGqlError";
 import ConfirmButton from "../../components/button/ConfirmButton";
 
 export default function SignUpScreen() {
-  const gqlClient = GqlClient.client;
   const navigate = useNavigate();
   const [isLoadingSignUp, setIsLoadingSignUp] = createSignal(false);
 
@@ -39,21 +38,21 @@ export default function SignUpScreen() {
     try {
       setIsLoadingSignUp(true);
 
-      const result = await gqlClient.mutate<{ signUp: { isSuccess: boolean } }>(
-        {
-          mutation: gql`
-            mutation SignUp($email: String!, $password: String!) {
-              signUp(email: $email, password: $password) {
-                isSuccess
-              }
+      const result = await GqlClient.client.mutate<{
+        signUp: { isSuccess: boolean };
+      }>({
+        mutation: gql`
+          mutation SignUp($email: String!, $password: String!) {
+            signUp(email: $email, password: $password) {
+              isSuccess
             }
-          `,
-          variables: {
-            email: target.email.value.toLowerCase(),
-            password: target.password.value,
-          },
-        }
-      );
+          }
+        `,
+        variables: {
+          email: target.email.value.toLowerCase(),
+          password: target.password.value,
+        },
+      });
 
       if (!result.data?.signUp.isSuccess) throw result.errors;
 

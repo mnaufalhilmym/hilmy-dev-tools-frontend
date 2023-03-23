@@ -11,9 +11,8 @@ import SitePath from "../../../data/sitePath";
 import showGqlError from "../../../helpers/showGqlError";
 
 export default function ResetPasswordScreen() {
-  const gqlClient = GqlClient.client;
   const navigate = useNavigate();
-  const [params, _] = useSearchParams<{ email?: string; code?: string }>();
+  const [params] = useSearchParams<{ email?: string; code?: string }>();
   const [isLoadingResetPassword, setIsLoadingResetPassword] =
     createSignal(false);
 
@@ -54,7 +53,7 @@ export default function ResetPasswordScreen() {
 
       setIsLoadingResetPassword(true);
 
-      const result = await gqlClient.mutate<{
+      const result = await GqlClient.client.mutate<{
         resetPassword: { isSuccess: boolean };
       }>({
         mutation: gql`

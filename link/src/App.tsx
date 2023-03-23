@@ -1,10 +1,10 @@
 import { RouteDefinition, useRoutes } from "@solidjs/router";
 import { Component, createRenderEffect, lazy } from "solid-js";
 import { Toaster } from "solid-toast";
+import GqlClient from "./api/gqlClient";
 import Head from "./components/head/Head";
 import SiteHead from "./data/siteHead";
 import SitePath from "./data/sitePath";
-import getLastScreenPath from "./helpers/getLastScreenPath";
 
 const routes: RouteDefinition[] = [
   {
@@ -15,10 +15,6 @@ const routes: RouteDefinition[] = [
         path: "/",
         component: lazy(() => import("./screens/MainScreen")),
       },
-      {
-        path: getLastScreenPath(SitePath.linksPath),
-        component: lazy(() => import("./screens/links/MainLinksScreen")),
-      },
     ],
   },
 ];
@@ -28,6 +24,7 @@ const App: Component = () => {
 
   createRenderEffect(() => {
     SiteHead.init();
+    GqlClient.init();
   });
 
   return (

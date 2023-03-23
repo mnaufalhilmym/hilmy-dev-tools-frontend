@@ -1,34 +1,36 @@
 import { gql } from "@apollo/client/core";
-import { Link, useNavigate, useSearchParams } from "@solidjs/router";
-import { createRenderEffect, createSignal, Show } from "solid-js";
+import { Link, useSearchParams } from "@solidjs/router";
+import { createRenderEffect, createSignal, For, Show } from "solid-js";
 import GqlClient from "../api/gqlClient";
-import DangerButton from "../components/button/DangerButton";
-import PlainButton from "../components/button/PlainButton";
+import AppsIcon from "../components/icon/AppsIcon";
+import Logout from "../components/icon/Logout";
+import ManageAccounts from "../components/icon/ManageAccounts";
 import LoadingSkeleton from "../components/loading/LoadingSkeleton";
-import { Modal } from "../components/modal/ModalWrapper";
+import { CenterModal } from "../components/modal/CenterModal";
 import SiteHead from "../data/siteHead";
 import SitePath from "../data/sitePath";
-import { removeCookie } from "../helpers/cookie";
+import { deleteCookie } from "../helpers/cookie";
 import getBgProfilePicture from "../helpers/getBgProfilePicture";
 import showGqlError from "../helpers/showGqlError";
-
-interface Account {
-  email: string;
-}
+import Account from "../types/account.type";
+import Apprepo from "../types/apprepo.type";
+import styles from "./MainScreen.module.css";
 
 export default function MainScreen() {
-  const gqlClient = GqlClient.client;
   const [params, setParams] = useSearchParams<{ invalidate?: string }>();
+  const [account, setAccount] = createSignal<Account>();
+  const [apps, setApps] = createSignal<Apprepo[]>([]);
+  const [headerModalShown, setHeaderModalShown] = createSignal<string>();
   const [isLoadingGetAccount, setIsLoadingGetAccount] = createSignal(false);
   const [isLoadingDeleteAccount, setIsLoadingDeleteAccount] =
     createSignal(false);
-  const [account, setAccount] = createSignal<Account>();
+  const [isLoadingGetApps, setIsLoadingGetApps] = createSignal(false);
 
   async function getAccount() {
     try {
       setIsLoadingGetAccount(true);
 
-      const result = await gqlClient.query<{
+      const result = await GqlClient.client.query<{
         account: Account;
       }>({
         query: gql`
@@ -56,16 +58,47 @@ export default function MainScreen() {
     }
   }
 
+  async function getApps() {
+    try {
+      setIsLoadingGetApps(true);
+
+      const result = await GqlClient.client.query<{
+        apprepos: Apprepo[];
+      }>({
+        query: gql`
+          query Apprepos {
+            apprepos {
+              name
+              icon
+              link
+            }
+          }
+        `,
+        fetchPolicy: "cache-first",
+      });
+
+      if (!result.data.apprepos) throw result.errors;
+
+      setApps(result.data.apprepos);
+    } catch (e) {
+      showGqlError(e);
+    } finally {
+      setIsLoadingGetAccount(false);
+    }
+  }
+
   createRenderEffect(() => {
     SiteHead.title = undefined;
-    getAccount();
+    (async () => {
+      await Promise.all([getAccount(), getApps()]);
+    })();
   });
 
   async function deleteAccount() {
     try {
       setIsLoadingDeleteAccount(true);
 
-      const result = await gqlClient.mutate<{
+      const result = await GqlClient.client.mutate<{
         deleteAccount: { isSuccess: boolean };
       }>({
         mutation: gql`
@@ -88,87 +121,159 @@ export default function MainScreen() {
   }
 
   function signOut() {
-    removeCookie("token");
+    deleteCookie("token");
     GqlClient.update();
     window.location.reload();
   }
 
   function showModalDeleteAccount() {
-    Modal.content = ModalConfirmDeleteAccount();
-    Modal.isShow = true;
+    CenterModal.content = ModalConfirmDeleteAccount();
+    CenterModal.isShow = true;
   }
 
   function showModalSignOut() {
-    Modal.content = ModalConfirmSignOut();
-    Modal.isShow = true;
+    CenterModal.content = ModalConfirmSignOut();
+    CenterModal.isShow = true;
+  }
+
+  function toggleModalAccount() {
+    if (headerModalShown() === "account") {
+      setHeaderModalShown();
+    } else {
+      setHeaderModalShown("account");
+    }
+  }
+
+  function toggleModalApps() {
+    if (headerModalShown() === "apps") {
+      setHeaderModalShown();
+    } else {
+      setHeaderModalShown("apps");
+    }
   }
 
   return (
-    <div class="min-w-screen min-h-screen flex flex-col justify-center">
-      <div>
-        <div
-          class="w-24 h-24 mx-auto flex items-center justify-center text-6xl text-white rounded-full overflow-hidden"
-          style={{
-            "background-color": account()?.email
-              ? getBgProfilePicture(account()!.email[0].toUpperCase())
-              : "transparent",
-          }}
-        >
-          <Show
-            when={account()?.email}
-            fallback={<LoadingSkeleton width="100%" height="100%" />}
-          >
-            {account()?.email[0].toUpperCase()}
-          </Show>
-        </div>
-        <div class="mt-4">
-          <Show
-            when={account()?.email}
-            fallback={
-              <div class="w-fit mx-auto rounded overflow-hidden">
-                <LoadingSkeleton width="300px" height="32px" />
+    <>
+      <div class="fixed top-0 w-full">
+        <div class="py-3 px-3.5 flex justify-between items-center">
+          <Link href={SitePath.homePath}>
+            <h1 class="px-1.5 font-bold text-xl">
+              {import.meta.env.VITE_SITE_NAME}
+            </h1>
+          </Link>
+          <div class="flex gap-x-2 items-center">
+            <button
+              type="button"
+              onclick={toggleModalApps}
+              class="flex p-2 hover:bg-black/5 active:bg-black/10 rounded-full transition duration-200"
+              classList={{
+                "!bg-black/10": headerModalShown() === "apps",
+              }}
+            >
+              <AppsIcon />
+            </button>
+            <button
+              type="button"
+              onclick={toggleModalAccount}
+              class="p-1 hover:bg-black/5 active:bg-black/10 rounded-full transition duration-200"
+              classList={{
+                "!bg-black/10": headerModalShown() === "account",
+              }}
+            >
+              <div
+                class="w-8 h-8 mx-auto flex items-center justify-center text-white rounded-full overflow-hidden"
+                style={{
+                  "background-color": account()?.email
+                    ? getBgProfilePicture(account()!.email[0].toUpperCase())
+                    : "transparent",
+                }}
+              >
+                <Show
+                  when={account()?.email}
+                  fallback={<LoadingSkeleton width="100%" height="100%" />}
+                >
+                  {account()?.email[0].toUpperCase()}
+                </Show>
               </div>
-            }
-          >
-            <span class="mx-auto block font-bold text-2xl text-center">
-              {account()!.email}
-            </span>
-          </Show>
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onclick={showModalSignOut}
-          class="mx-auto block text-center"
-        >
-          Sign out
-        </button>
+
+        <ModalApps />
+        <ModalAccount />
       </div>
-      <div class="mt-6">
-        <Link href={SitePath.emailPath} class="w-fit mx-auto block text-center">
-          Change email
-        </Link>
-        <Link
-          href={SitePath.passwordPath}
-          class="w-fit mx-auto block text-center"
-        >
-          Change password
-        </Link>
+
+      <div class="min-w-screen min-h-screen flex flex-col">
+        <div class="flex-1 flex flex-col justify-center">
+          <div>
+            <div
+              class="w-24 h-24 mx-auto flex items-center justify-center text-6xl text-white rounded-full overflow-hidden"
+              style={{
+                "background-color": account()?.email
+                  ? getBgProfilePicture(account()!.email[0].toUpperCase())
+                  : "transparent",
+              }}
+            >
+              <Show
+                when={account()?.email}
+                fallback={<LoadingSkeleton width="100%" height="100%" />}
+              >
+                {account()?.email[0].toUpperCase()}
+              </Show>
+            </div>
+            <div class="mt-4">
+              <Show
+                when={account()?.email}
+                fallback={
+                  <div class="w-fit mx-auto rounded overflow-hidden">
+                    <LoadingSkeleton width="300px" height="32px" />
+                  </div>
+                }
+              >
+                <span class="mx-auto block font-bold text-2xl text-center">
+                  {account()!.email}
+                </span>
+              </Show>
+            </div>
+            <button
+              type="button"
+              onclick={showModalSignOut}
+              class="mx-auto block text-center"
+            >
+              Sign out
+            </button>
+          </div>
+          <div class="mt-6">
+            <Link
+              href={SitePath.emailPath}
+              class="w-fit mx-auto block text-center"
+            >
+              Change email
+            </Link>
+            <Link
+              href={SitePath.passwordPath}
+              class="w-fit mx-auto block text-center"
+            >
+              Change password
+            </Link>
+          </div>
+          <div class="mt-8">
+            <button
+              type="button"
+              onclick={showModalDeleteAccount}
+              class="mx-auto block text-center"
+            >
+              Delete account
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="mt-8">
-        <button
-          type="button"
-          onclick={showModalDeleteAccount}
-          class="mx-auto block text-center"
-        >
-          Delete account
-        </button>
-      </div>
-    </div>
+    </>
   );
 
   function ModalConfirmSignOut() {
     function cancel() {
-      Modal.isShow = false;
+      CenterModal.isShow = false;
     }
 
     return (
@@ -198,7 +303,7 @@ export default function MainScreen() {
 
   function ModalConfirmDeleteAccount() {
     function cancel() {
-      Modal.isShow = false;
+      CenterModal.isShow = false;
     }
 
     return (
@@ -223,6 +328,111 @@ export default function MainScreen() {
           </button>
         </div>
       </div>
+    );
+  }
+
+  function ModalAccount() {
+    return (
+      <Show when={headerModalShown() === "account"}>
+        <div class="absolute right-0 min-w-0 max-w-full px-4">
+          <div class="min-w-0 w-full max-w-sm bg-white drop-shadow-lg rounded-3xl border border-teal-200 overflow-hidden">
+            <div class="p-2 bg-teal-100/40">
+              <div class="p-4 bg-white rounded-2xl">
+                <div class="flex items-center gap-x-3.5">
+                  <div
+                    class="flex-none w-16 h-16 mx-auto flex items-center justify-center text-4xl text-white rounded-full overflow-hidden"
+                    style={{
+                      "background-color": account()?.email
+                        ? getBgProfilePicture(account()!.email[0].toUpperCase())
+                        : "transparent",
+                    }}
+                  >
+                    <Show
+                      when={account()?.email}
+                      fallback={<LoadingSkeleton width="100%" height="100%" />}
+                    >
+                      {account()?.email[0].toUpperCase()}
+                    </Show>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <Show
+                      when={account()?.email}
+                      fallback={
+                        <div class="mx-auto rounded overflow-hidden">
+                          <LoadingSkeleton width="100%" height="24px" />
+                        </div>
+                      }
+                    >
+                      <span class="mx-auto block font-bold truncate">
+                        {account()!.email}
+                        {account()!.email}
+                        {account()!.email}
+                      </span>
+                    </Show>
+                  </div>
+                </div>
+                <div class="ml-20 my-2 flex flex-wrap gap-2">
+                  <Link
+                    href={import.meta.env.VITE_SITE_ACCOUNT_URL}
+                    rel="noopener noreferrer"
+                    target="_black"
+                    onclick={toggleModalAccount}
+                    class="py-1.5 px-4 flex gap-x-2 items-center font-bold text-sm border border-black hover:bg-black/5 active:bg-black/10 rounded-lg"
+                  >
+                    <ManageAccounts />
+                    <span>Manage</span>
+                  </Link>
+                  <button
+                    type="button"
+                    onclick={signOut}
+                    class="py-1.5 px-4 flex gap-x-2 items-center font-bold text-sm border border-black hover:bg-black/5 active:bg-black/10 rounded-lg"
+                  >
+                    <Logout />
+                    <span>Sign out</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Show>
+    );
+  }
+
+  function ModalApps() {
+    return (
+      <Show when={headerModalShown() === "apps"}>
+        <div class="absolute right-0 sm:right-16 px-2 sm:px-0">
+          <div class="w-full max-w-xs bg-white drop-shadow-lg rounded-lg border overflow-hidden">
+            <div
+              class={`${styles["custom-scrollbar"]} max-h-96 py-2 px-3 overflow-y-auto`}
+            >
+              <div class="grid grid-cols-3">
+                <For each={apps()}>
+                  {(app) => (
+                    <div class="w-24 p-2 aspect-square">
+                      <Link
+                        href={app.link}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        onclick={toggleModalApps}
+                        class="block w-full h-full p-2 flex flex-col hover:bg-teal-100/50 active:bg-teal-100/80 rounded-lg"
+                      >
+                        <div class="min-h-0 min-w-0 flex-1 w-fit mx-auto flex items-center justify-center">
+                          <img src={app.icon} alt={app.name} />
+                        </div>
+                        <span class="flex-none block text-center truncate">
+                          {app.name}
+                        </span>
+                      </Link>
+                    </div>
+                  )}
+                </For>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Show>
     );
   }
 }

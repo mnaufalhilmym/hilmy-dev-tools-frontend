@@ -11,9 +11,8 @@ import ConfirmButton from "../../components/button/ConfirmButton";
 import toast from "solid-toast";
 
 export default function EmailVerifyScreen() {
-  const gqlClient = GqlClient.client;
   const navigate = useNavigate();
-  const [params, _] = useSearchParams<{ email?: string }>();
+  const [params] = useSearchParams<{ email?: string }>();
   const [isLoadingVerifyEmail, setIsLoadingVerifyEmail] = createSignal(false);
 
   createRenderEffect(() => {
@@ -48,7 +47,7 @@ export default function EmailVerifyScreen() {
     try {
       setIsLoadingVerifyEmail(true);
 
-      const result = await gqlClient.mutate<{
+      const result = await GqlClient.client.mutate<{
         verifyChangeEmail: { isSuccess: boolean };
       }>({
         mutation: gql`

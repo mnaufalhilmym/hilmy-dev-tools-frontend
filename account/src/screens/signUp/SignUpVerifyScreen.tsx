@@ -11,9 +11,8 @@ import ConfirmButton from "../../components/button/ConfirmButton";
 import toast from "solid-toast";
 
 export default function SignUpVerifyScreen() {
-  const gqlClient = GqlClient.client;
   const navigate = useNavigate();
-  const [params, _] = useSearchParams<{ email?: string }>();
+  const [params] = useSearchParams<{ email?: string }>();
   const [isLoadingVerifySignUp, setIsLoadingVerifySignUp] = createSignal(false);
 
   createRenderEffect(() => {
@@ -48,7 +47,7 @@ export default function SignUpVerifyScreen() {
     try {
       setIsLoadingVerifySignUp(true);
 
-      const result = await gqlClient.mutate<{
+      const result = await GqlClient.client.mutate<{
         verifySignUp: { isSuccess: boolean };
       }>({
         mutation: gql`

@@ -11,7 +11,6 @@ import { saveCookie } from "../../helpers/cookie";
 import showGqlError from "../../helpers/showGqlError";
 
 export default function SignInScreen() {
-  const gqlClient = GqlClient.client;
   const navigate = useNavigate();
   const [isLoadingSignIn, setIsLoadingSignIn] = createSignal(false);
 
@@ -39,7 +38,9 @@ export default function SignInScreen() {
     try {
       setIsLoadingSignIn(true);
 
-      const result = await gqlClient.mutate<{ signIn: { token: string } }>({
+      const result = await GqlClient.client.mutate<{
+        signIn: { token: string };
+      }>({
         mutation: gql`
           mutation SignIn($email: String!, $password: String!) {
             signIn(email: $email, password: $password) {
@@ -55,11 +56,21 @@ export default function SignInScreen() {
 
       if (!result.data?.signIn.token) throw result.errors;
 
-      saveCookie({ key: "token", value: result.data.signIn.token });
-
-      GqlClient.update();
-
-      navigate(SitePath.homePath, { replace: true });
+      let redirect = sessionStorage.getItem("redirect");
+      if (redirect) {
+        sessionStorage.removeItem("redirect");
+        if (redirect.includes("?")) {
+          redirect += "&";
+        } else {
+          redirect += "?";
+        }
+        redirect += `token=${result.data.signIn.token}`;
+        window.location.replace(redirect);
+      } else {
+        saveCookie({ key: "token", value: result.data.signIn.token });
+        GqlClient.update();
+        navigate(SitePath.homePath, { replace: true });
+      }
     } catch (e) {
       showGqlError(e);
     } finally {

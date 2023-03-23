@@ -1,7 +1,7 @@
-export function getTokenFromCookie() {
+export function readCookie(key: string) {
   return document.cookie
     .split(";")
-    .find((row) => row.startsWith("token"))
+    .find((row) => row.startsWith(key))
     ?.split("=")?.[1];
 }
 
@@ -15,6 +15,6 @@ export function saveCookie(cookie: {
   };path=/;Secure`;
 }
 
-export function removeCookie(key: string) {
+export function deleteCookie(key: string) {
   saveCookie({ key, expires: "Thu, 01 Jan 1970 00:00:00 GMT" });
 }

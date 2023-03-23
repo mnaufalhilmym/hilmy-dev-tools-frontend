@@ -10,7 +10,6 @@ import SitePath from "../../data/sitePath";
 import showGqlError from "../../helpers/showGqlError";
 
 export default function MainEmailScreen() {
-  const gqlClient = GqlClient.client;
   const navigate = useNavigate();
   const [isLoadingChangeEmail, setIsLoadingChangeEmail] = createSignal(false);
 
@@ -33,7 +32,7 @@ export default function MainEmailScreen() {
     try {
       setIsLoadingChangeEmail(true);
 
-      const result = await gqlClient.mutate<{
+      const result = await GqlClient.client.mutate<{
         changeEmail: { isSuccess: boolean };
       }>({
         mutation: gql`

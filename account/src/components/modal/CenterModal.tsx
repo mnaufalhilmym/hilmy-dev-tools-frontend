@@ -6,7 +6,7 @@ import {
   Setter,
 } from "solid-js";
 
-export class Modal {
+export class CenterModal {
   private static _getIsShow: Accessor<boolean>;
   private static _setIsShow: Setter<boolean>;
   private static _getContent: Accessor<JSXElement>;
@@ -34,13 +34,13 @@ export class Modal {
   }
 }
 
-export function ModalWrapper() {
+export function CenterModalWrapper() {
   createRenderEffect(() => {
-    Modal.init();
+    CenterModal.init();
   });
 
   function closeModal() {
-    Modal.isShow = false;
+    CenterModal.isShow = false;
   }
 
   function stopPropagation(
@@ -53,8 +53,8 @@ export function ModalWrapper() {
   }
 
   function onTransitionEnd() {
-    if (!Modal.isShow()) {
-      Modal.content = undefined;
+    if (!CenterModal.isShow()) {
+      CenterModal.content = undefined;
     }
   }
 
@@ -63,16 +63,16 @@ export function ModalWrapper() {
       onclick={closeModal}
       class="fixed w-screen h-screen top-0 right-0 bottom-0 left-0 p-10 flex items-center bg-black/10 opacity-0 transition-all duration-200"
       classList={{
-        invisible: !Modal.isShow(),
-        "opacity-100": Modal.isShow(),
+        invisible: !CenterModal.isShow(),
+        "opacity-100": CenterModal.isShow(),
       }}
       ontransitionend={onTransitionEnd}
     >
       <div
         onclick={stopPropagation}
-        class="mx-auto p-8 bg-white border rounded-xl"
+        class="mx-auto p-8 bg-white border rounded-xl drop-shadow-lg"
       >
-        {Modal.content()}
+        {CenterModal.content()}
       </div>
     </div>
   );

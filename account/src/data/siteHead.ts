@@ -1,7 +1,7 @@
 import { Accessor, createSignal, Setter } from "solid-js";
 
 export default class SiteHead {
-  private static __defaultTitle = "Account";
+  private static __defaultTitle = import.meta.env.VITE_SITE_NAME;
 
   private static _getTitle: Accessor<string>;
   private static _setTitle: Setter<string>;

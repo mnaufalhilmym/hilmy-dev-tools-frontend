@@ -3,7 +3,7 @@ import { Component, createRenderEffect, lazy } from "solid-js";
 import { Toaster } from "solid-toast";
 import GqlClient from "./api/gqlClient";
 import Head from "./components/head/Head";
-import { ModalWrapper } from "./components/modal/ModalWrapper";
+import { CenterModalWrapper } from "./components/modal/CenterModal";
 import SiteHead from "./data/siteHead";
 import SitePath from "./data/sitePath";
 import getLastScreenPath from "./helpers/getLastScreenPath";
@@ -107,7 +107,7 @@ const App: Component = () => {
       <Head />
       <Routes />
       <Toaster position="top-right" gutter={8} />
-      <ModalWrapper />
+      <CenterModalWrapper />
     </>
   );
 };

@@ -10,9 +10,8 @@ import SitePath from "../../../data/sitePath";
 import showGqlError from "../../../helpers/showGqlError";
 
 export default function VerifyRequestResetPasswordScreen() {
-  const gqlClient = GqlClient.client;
   const navigate = useNavigate();
-  const [params, _] = useSearchParams<{ email?: string }>();
+  const [params] = useSearchParams<{ email?: string }>();
   const [isLoadingVerifyResetPassword, setIsLoadingVerifyResetPassword] =
     createSignal(false);
 
@@ -48,7 +47,7 @@ export default function VerifyRequestResetPasswordScreen() {
     try {
       setIsLoadingVerifyResetPassword(true);
 
-      const result = await gqlClient.mutate<{
+      const result = await GqlClient.client.mutate<{
         verifyRequestResetPassword: { isSuccess: boolean };
       }>({
         mutation: gql`

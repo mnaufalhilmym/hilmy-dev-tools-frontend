@@ -12,7 +12,6 @@ import SitePath from "../../data/sitePath";
 import showGqlError from "../../helpers/showGqlError";
 
 export default function MainPasswordScreen() {
-  const gqlClient = GqlClient.client;
   const navigate = useNavigate();
   const [isLoadingChangePassword, setIsLoadingChangePassword] =
     createSignal(false);
@@ -46,7 +45,7 @@ export default function MainPasswordScreen() {
 
       setIsLoadingChangePassword(true);
 
-      const result = await gqlClient.mutate<{
+      const result = await GqlClient.client.mutate<{
         changePassword: { isSuccess: boolean };
       }>({
         mutation: gql`

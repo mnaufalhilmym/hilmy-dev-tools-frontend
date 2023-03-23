@@ -7,12 +7,13 @@ export default function showGqlError(e: any) {
   }
   let error: string;
   if (e instanceof ApolloError) {
-    error = e.message
-      .split(",")[1]
-      .split('"')
-      .slice(1, -1)
-      .join(" ")
-      .replaceAll("\\", "");
+    error =
+      e.message
+        .split(",")[1]
+        ?.split('"')
+        .slice(1, -1)
+        .join(" ")
+        .replaceAll("\\", "") ?? e.message;
   } else {
     error = e as string;
   }
