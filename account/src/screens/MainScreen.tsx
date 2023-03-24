@@ -89,9 +89,9 @@ export default function MainScreen() {
 
   createRenderEffect(() => {
     SiteHead.title = undefined;
-    (async () => {
-      await Promise.all([getAccount(), getApps()]);
-    })();
+
+    getAccount();
+    getApps();
   });
 
   async function deleteAccount() {
@@ -365,15 +365,13 @@ export default function MainScreen() {
                     >
                       <span class="mx-auto block font-bold truncate">
                         {account()!.email}
-                        {account()!.email}
-                        {account()!.email}
                       </span>
                     </Show>
                   </div>
                 </div>
                 <div class="ml-20 my-2 flex flex-wrap gap-2">
                   <Link
-                    href={import.meta.env.VITE_SITE_ACCOUNT_URL}
+                    href={SitePath.homePath}
                     rel="noopener noreferrer"
                     target="_black"
                     onclick={toggleModalAccount}
@@ -405,7 +403,7 @@ export default function MainScreen() {
         <div class="absolute right-0 sm:right-16 px-2 sm:px-0">
           <div class="w-full max-w-xs bg-white drop-shadow-lg rounded-lg border overflow-hidden">
             <div
-              class={`${styles["custom-scrollbar"]} max-h-96 py-2 px-3 overflow-y-auto`}
+              class={`max-h-96 py-2 px-3 overflow-y-auto ${styles["custom-scrollbar"]}`}
             >
               <div class="grid grid-cols-3">
                 <For each={apps()}>

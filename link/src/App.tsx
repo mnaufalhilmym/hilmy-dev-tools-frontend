@@ -5,6 +5,7 @@ import GqlClient from "./api/gqlClient";
 import Head from "./components/head/Head";
 import SiteHead from "./data/siteHead";
 import SitePath from "./data/sitePath";
+import getLastScreenPath from "./helpers/getLastScreenPath";
 
 const routes: RouteDefinition[] = [
   {
@@ -14,6 +15,10 @@ const routes: RouteDefinition[] = [
       {
         path: "/",
         component: lazy(() => import("./screens/MainScreen")),
+      },
+      {
+        path: `${getLastScreenPath(SitePath.linksPath)}/:id?`,
+        component: lazy(() => import("./screens/links/[id]/MainLinksScreen")),
       },
     ],
   },

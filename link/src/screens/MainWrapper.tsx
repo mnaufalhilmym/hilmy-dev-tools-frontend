@@ -1,8 +1,10 @@
 import { gql } from "@apollo/client/core";
-import { Link, Outlet, useSearchParams } from "@solidjs/router";
+import { Link, Outlet, useLocation, useSearchParams } from "@solidjs/router";
 import { createRenderEffect, createSignal, For, Show } from "solid-js";
 import GqlClient from "../api/gqlClient";
+import AddIcon from "../components/icon/AddIcon";
 import AppsIcon from "../components/icon/AppsIcon";
+import LinkIcon from "../components/icon/LinkIcon";
 import Logout from "../components/icon/Logout";
 import ManageAccounts from "../components/icon/ManageAccounts";
 import LoadingSkeleton from "../components/loading/LoadingSkeleton";
@@ -16,6 +18,7 @@ import Apprepo from "../types/apprepo.type";
 import styles from "./MainWrapper.module.css";
 
 export default function MainWrapper() {
+  const location = useLocation();
   const [params, setParams] = useSearchParams<{ token?: string }>();
   const [account, setAccount] = createSignal<Account>();
   const [apps, setApps] = createSignal<Apprepo[]>([]);
@@ -24,42 +27,19 @@ export default function MainWrapper() {
   const [isLoadingGetAccount, setIsLoadingGetAccount] = createSignal(false);
   const [isLoadingGetApps, setIsLoadingGetApps] = createSignal(false);
 
-  async function getAccount() {
+  async function getAccountAndApps() {
     try {
       setIsLoadingGetAccount(true);
 
       const result = await GqlClient.client.query<{
         account: Account;
-      }>({
-        query: gql`
-          query Account {
-            account {
-              email
-            }
-          }
-        `,
-        fetchPolicy: "cache-first",
-      });
-
-      if (!result.data.account.email) throw result.errors;
-
-      setAccount(result.data.account);
-    } catch (e) {
-      showGqlError(e);
-    } finally {
-      setIsLoadingGetAccount(false);
-    }
-  }
-
-  async function getApps() {
-    try {
-      setIsLoadingGetApps(true);
-
-      const result = await GqlClient.client.query<{
         apprepos: Apprepo[];
       }>({
         query: gql`
-          query Apprepos {
+          query AccountAndApprepos {
+            account {
+              email
+            }
             apprepos {
               name
               icon
@@ -70,8 +50,10 @@ export default function MainWrapper() {
         fetchPolicy: "cache-first",
       });
 
-      if (!result.data.apprepos) throw result.errors;
+      if (!result.data.account.email || !result.data.apprepos)
+        throw result.errors;
 
+      setAccount(result.data.account);
       setApps(result.data.apprepos);
     } catch (e) {
       showGqlError(e);
@@ -107,10 +89,12 @@ export default function MainWrapper() {
     }
 
     SiteHead.title = undefined;
+  });
 
-    (async () => {
-      await Promise.all([getAccount(), getApps()]);
-    })();
+  createRenderEffect(() => {
+    if (isLoaded()) {
+      getAccountAndApps();
+    }
   });
 
   function signOut() {
@@ -137,7 +121,7 @@ export default function MainWrapper() {
 
   return (
     <Show when={isLoaded()}>
-      <div class="fixed top-0 w-full">
+      <div class="fixed z-50 top-0 w-full">
         <div class="py-3 px-3.5 flex justify-between items-center">
           <Link href={SitePath.homePath}>
             <h1 class="px-1.5 font-bold text-xl">
@@ -186,8 +170,33 @@ export default function MainWrapper() {
         <ModalAccount />
       </div>
 
-      <div class="pt-16 px-3.5">
-        <Outlet />
+      <div class="h-screen pt-16 flex">
+        <div class="h-full pr-4 border-r space-y-2">
+          <Link
+            href={SitePath.homePath}
+            class="w-full py-2 pl-8 pr-16 flex items-center gap-x-2 hover:bg-teal-50 rounded-r-full"
+            classList={{
+              "!bg-teal-100": location.pathname === SitePath.homePath,
+            }}
+          >
+            <AddIcon />
+            <span>Create</span>
+          </Link>
+          <Link
+            href={SitePath.linksPath}
+            class="w-full py-2 pl-8 pr-16 flex items-center gap-x-2 hover:bg-teal-50 rounded-r-full"
+            classList={{
+              "!bg-teal-100": location.pathname.startsWith(SitePath.linksPath),
+            }}
+          >
+            <LinkIcon />
+            <span>Links</span>
+          </Link>
+        </div>
+
+        <div class="relative w-full">
+          <Outlet />
+        </div>
       </div>
     </Show>
   );
@@ -225,8 +234,6 @@ export default function MainWrapper() {
                       }
                     >
                       <span class="mx-auto block font-bold truncate">
-                        {account()!.email}
-                        {account()!.email}
                         {account()!.email}
                       </span>
                     </Show>
@@ -266,7 +273,7 @@ export default function MainWrapper() {
         <div class="absolute right-0 sm:right-16 px-2 sm:px-0">
           <div class="w-full max-w-xs bg-white drop-shadow-lg rounded-lg border overflow-hidden">
             <div
-              class={`${styles["custom-scrollbar"]} max-h-96 py-2 px-3 overflow-y-auto`}
+              class={`max-h-96 py-2 px-3 overflow-y-auto ${styles["custom-scrollbar"]}`}
             >
               <div class="grid grid-cols-3">
                 <For each={apps()}>
