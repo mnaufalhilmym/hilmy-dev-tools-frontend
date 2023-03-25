@@ -5,9 +5,11 @@ interface Props {
   label: JSXElement;
   prefix: JSXElement;
   name: string;
+  title?: string;
   placeholder: string;
   type: string;
   required?: boolean;
+  pattern?: string;
   oninput?: (
     event: InputEvent & {
       currentTarget: HTMLInputElement;
@@ -24,9 +26,11 @@ export default function PlainTextFieldWithLabelAndPrefix(props: Props) {
         {props.prefix}
         <input
           name={props.name}
+          title={props.title}
           placeholder={props.placeholder}
           type={props.type}
           required={props.required}
+          pattern={props.pattern}
           oninput={props.oninput}
           class="w-full py-2.5 pr-3 outline-none bg-transparent placeholder:text-black/30"
         />

@@ -22,7 +22,7 @@ export default function ResetPasswordScreen() {
       return;
     }
 
-    SiteHead.title = "Set New Password";
+    SiteHead.title = "Set new password";
   });
 
   function back() {

@@ -15,7 +15,7 @@ export default function MainScreen() {
   const [isShortUrlFilled, setIsShortUrlFilled] = createSignal(false);
 
   createRenderEffect(() => {
-    SiteHead.title = "Create Link";
+    SiteHead.title = "Create link";
   });
 
   async function isShortUrlAvailable(shortUrl: string) {
@@ -104,6 +104,9 @@ export default function MainScreen() {
 
       target.long_url.value = "";
       target.title.value = "";
+      if (!!target.short_url.value) {
+        setIsShortUrlFilled(false);
+      }
       target.short_url.value = "";
 
       await navigator.clipboard.writeText(
@@ -143,9 +146,13 @@ export default function MainScreen() {
             <PlainTextFieldWithLabel
               label="Destination"
               name="long_url"
+              title="A valid URL"
               placeholder="http://www.my_long_url.com"
               type="url"
               required
+              pattern={`^(?!.*(${
+                import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN
+              }|${window.location.host})).*$`}
             />
           </div>
           <div class="mt-6">
@@ -175,8 +182,10 @@ export default function MainScreen() {
                 </span>
               }
               name="short_url"
+              title="A valid URL path with at least 3 letters"
               placeholder="memorable_words"
               type="text"
+              pattern="^[a-zA-Z0-9-_]{3,}$"
               oninput={onInputShortUrl}
             />
           </div>

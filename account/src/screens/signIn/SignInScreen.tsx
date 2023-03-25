@@ -7,7 +7,7 @@ import EmailTextField from "../../components/form/EmailTextField";
 import PasswordTextField from "../../components/form/PasswordTextField";
 import SiteHead from "../../data/siteHead";
 import SitePath from "../../data/sitePath";
-import { saveCookie } from "../../helpers/cookie";
+import { deleteCookie, saveCookie } from "../../helpers/cookie";
 import showGqlError from "../../helpers/showGqlError";
 
 export default function SignInScreen() {
@@ -15,7 +15,7 @@ export default function SignInScreen() {
   const [isLoadingSignIn, setIsLoadingSignIn] = createSignal(false);
 
   createRenderEffect(() => {
-    SiteHead.title = "Sign In";
+    SiteHead.title = "Sign in";
   });
 
   async function signIn(
@@ -57,7 +57,7 @@ export default function SignInScreen() {
       if (!result.data?.signIn.token) throw result.errors;
 
       let redirect = sessionStorage.getItem("redirect");
-      if (redirect) {
+      if (!!redirect) {
         sessionStorage.removeItem("redirect");
         if (redirect.includes("?")) {
           redirect += "&";

@@ -15,7 +15,7 @@ export default function RequestResetPasswordScreen() {
     createSignal(false);
 
   createRenderEffect(() => {
-    SiteHead.title = "Reset Password";
+    SiteHead.title = "Reset password";
   });
 
   function back() {

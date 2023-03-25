@@ -21,7 +21,7 @@ export default function EmailVerifyScreen() {
       return;
     }
 
-    SiteHead.title = "Email Verification";
+    SiteHead.title = "Email verification";
   });
 
   function back() {

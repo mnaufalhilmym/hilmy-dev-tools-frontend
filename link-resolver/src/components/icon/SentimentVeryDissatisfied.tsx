@@ -1,7 +1,7 @@
-export default function LinkIcon() {
+export default function SentimentVeryDissatisfied() {
   return (
     <span class="material-symbols-outlined" style={{ "font-size": "inherit" }}>
-      link
+      sentiment_very_dissatisfied
     </span>
   );
 }

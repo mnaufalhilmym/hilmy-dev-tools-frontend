@@ -21,7 +21,7 @@ export default function VerifyRequestResetPasswordScreen() {
       return;
     }
 
-    SiteHead.title = "Reset Password Verification";
+    SiteHead.title = "Reset password verification";
   });
 
   function back() {

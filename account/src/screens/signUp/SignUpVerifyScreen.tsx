@@ -21,7 +21,7 @@ export default function SignUpVerifyScreen() {
       return;
     }
 
-    SiteHead.title = "Sign Up Verification";
+    SiteHead.title = "Sign up verification";
   });
 
   function back() {

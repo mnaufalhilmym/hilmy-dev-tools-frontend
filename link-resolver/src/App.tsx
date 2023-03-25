@@ -3,6 +3,8 @@ import { Component, createRenderEffect, createSignal, Show } from "solid-js";
 import GqlClient from "./api/gqlClient";
 import getGqlErrorMsg from "./helpers/getGqlErrorMsg";
 import parseGqlErrorMsg from "./helpers/parseGqlErrorMsg";
+import ErrorWrapper from "./screens/error/ErrorWrapper";
+import LoadingScreen from "./screens/LoadingScreen";
 
 const App: Component = () => {
   const [error, setError] = createSignal<string>();
@@ -38,12 +40,15 @@ const App: Component = () => {
         window.location.replace(result.data.visitLink.longUrl);
       } catch (e) {
         setError(parseGqlErrorMsg(getGqlErrorMsg(e as any)));
+        if (import.meta.env.DEV) {
+          console.error(e);
+        }
       }
     })();
   });
   return (
-    <Show when={!error()} fallback={<span>{error()}</span>}>
-      <span>You will be redirected soon...</span>
+    <Show when={!error()} fallback={<ErrorWrapper error={error()} />}>
+      <LoadingScreen />
     </Show>
   );
 };

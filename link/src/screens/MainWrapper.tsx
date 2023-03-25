@@ -179,7 +179,9 @@ export default function MainWrapper() {
               "!bg-teal-100": location.pathname === SitePath.homePath,
             }}
           >
-            <AddIcon />
+            <span class="flex text-2xl">
+              <AddIcon />
+            </span>
             <span>Create</span>
           </Link>
           <Link
@@ -189,7 +191,9 @@ export default function MainWrapper() {
               "!bg-teal-100": location.pathname.startsWith(SitePath.linksPath),
             }}
           >
-            <LinkIcon />
+            <span class="flex text-2xl">
+              <LinkIcon />
+            </span>
             <span>Links</span>
           </Link>
         </div>

@@ -9,9 +9,12 @@ import CancelIcon from "../../../components/icon/CancelIcon";
 import ContentCopyIcon from "../../../components/icon/ContentCopyIcon";
 import DeleteIcon from "../../../components/icon/DeleteIcon";
 import EditIcon from "../../../components/icon/EditIcon";
+import LinkIcon from "../../../components/icon/LinkIcon";
 import SaveIcon from "../../../components/icon/SaveIcon";
 import SuBdirectoryArrowRightIcon from "../../../components/icon/SubdirectoryArrowRightIcon";
 import VisibilityIcon from "../../../components/icon/VisibilityIcon";
+import LoadingSkeleton from "../../../components/loading/LoadingSkeleton";
+import { CenterModal } from "../../../components/modal/CenterModal";
 import SiteHead from "../../../data/siteHead";
 import SitePath from "../../../data/sitePath";
 import getGqlErrorMsg from "../../../helpers/getGqlErrorMsg";
@@ -62,7 +65,7 @@ export default function MainLinksScreen() {
   }
 
   createRenderEffect(() => {
-    SiteHead.title = "Manage Link";
+    SiteHead.title = "Manage link";
 
     getLinks();
   });
@@ -212,6 +215,11 @@ export default function MainLinksScreen() {
     }
   }
 
+  function showModalDeleteLink() {
+    CenterModal.content = ModalDeleteLink();
+    CenterModal.isShow = true;
+  }
+
   return (
     <div class="w-full h-full flex flex-col">
       <div class="px-4 pt-1">
@@ -222,7 +230,7 @@ export default function MainLinksScreen() {
           <div
             class={`flex-none h-full w-72 overflow-y-auto border-r ${styles["custom-scrollbar"]}`}
           >
-            <For each={links()}>
+            <For each={links()} fallback={<LinksFallback />}>
               {(link) => (
                 <Link
                   href={`${SitePath.linksPath}/${link.id}`}
@@ -259,7 +267,8 @@ export default function MainLinksScreen() {
               )}
             </For>
           </div>
-          <Show when={selectedLink()?.id}>
+
+          <Show when={selectedLink()?.id} fallback={<DetailLinkFallback />}>
             <div
               class={`flex-1 h-full p-4 overflow-y-auto ${styles["custom-scrollbar"]}`}
             >
@@ -293,7 +302,7 @@ export default function MainLinksScreen() {
                       </button>
                       <button
                         type="button"
-                        onclick={deleteLink}
+                        onclick={showModalDeleteLink}
                         class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-red-100 rounded-lg"
                       >
                         <span class="flex text-2xl">
@@ -342,7 +351,7 @@ export default function MainLinksScreen() {
                     <VisibilityIcon />
                   </span>
                   <span>{selectedLink()!.visits}</span>
-                  <span> clicks</span>
+                  <span> click{selectedLink()!.visits !== 1 ? "s" : ""}</span>
                 </div>
               </div>
               <div class="mt-4 p-4 border rounded-lg">
@@ -436,4 +445,114 @@ export default function MainLinksScreen() {
       </div>
     </div>
   );
+
+  function LinksFallback() {
+    return (
+      <>
+        <Show when={isLoadingGetLinks()}>
+          <For each={[1, 2, 3]}>
+            {(i) => (
+              <div class="block p-2">
+                <div class="flex">
+                  <LoadingSkeleton height="1rem" width="5rem" />
+                </div>
+                <div class="my-0.5">
+                  <LoadingSkeleton height="1.5rem" width="100%" />
+                </div>
+                <div class="flex gap-x-2 justify-between text-sm">
+                  <div class="flex-1">
+                    <LoadingSkeleton height="1.25rem" width="70%" />
+                  </div>
+                  <div class="flex-none flex items-center gap-x-1 text-black/50">
+                    <LoadingSkeleton height="1.25rem" width="2rem" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </For>
+        </Show>
+
+        <Show when={!isLoadingGetLinks()}>
+          <div class="h-full p-6 flex items-center">
+            <div class="mx-auto">
+              <div class="w-fit mx-auto text-6xl">
+                <LinkIcon />
+              </div>
+              <div>
+                <span class="block font-bold text-center">
+                  Create your first link
+                </span>
+              </div>
+              <div class="mt-3">
+                <span class="block text-center">
+                  Click the{" "}
+                  <Link href={SitePath.homePath} class="text-teal-500">
+                    + Create
+                  </Link>{" "}
+                  button in the sidebar to get started.
+                </span>
+              </div>
+            </div>
+          </div>
+        </Show>
+      </>
+    );
+  }
+
+  function DetailLinkFallback() {
+    return (
+      <Show when={links().length > 0}>
+        <div class="w-full h-full flex items-center">
+          <div class="mx-auto">
+            <div class="w-fit mx-auto text-6xl">
+              <LinkIcon />
+            </div>
+            <div>
+              <span class="block font-bold text-center">No selected link</span>
+            </div>
+            <div class="mt-3">
+              <span class="block text-center">
+                Select a link to show the detail
+              </span>
+            </div>
+          </div>
+        </div>
+      </Show>
+    );
+  }
+
+  function ModalDeleteLink() {
+    function cancel() {
+      CenterModal.isShow = false;
+    }
+
+    async function delLink() {
+      CenterModal.isShow = false;
+      await deleteLink();
+    }
+
+    return (
+      <div>
+        <div>
+          <span>Are you sure you want to delete {selectedLink()?.title}?</span>
+        </div>
+        <div class="mt-4 flex justify-between">
+          <button
+            type="button"
+            onclick={cancel}
+            class="px-4 py-1.5 hover:bg-black/5 active:bg-black/10 hover:drop-shadow rounded transition duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onclick={delLink}
+            class="px-4 py-1.5 bg-red-500 hover:bg-red-600 active:bg-red-700 hover:drop-shadow text-white rounded transition duration-200"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    );
+  }
 }

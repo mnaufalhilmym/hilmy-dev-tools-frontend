@@ -15,7 +15,7 @@ export default function SignUpScreen() {
   const [isLoadingSignUp, setIsLoadingSignUp] = createSignal(false);
 
   createRenderEffect(() => {
-    SiteHead.title = "Sign Up";
+    SiteHead.title = "Sign up";
   });
 
   async function signUp(
