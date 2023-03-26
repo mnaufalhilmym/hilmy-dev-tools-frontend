@@ -18,25 +18,33 @@ import styles from "./MainScreen.module.css";
 
 export default function MainScreen() {
   const [params, setParams] = useSearchParams<{ invalidate?: string }>();
-  const [account, setAccount] = createSignal<Account>();
-  const [apps, setApps] = createSignal<Apprepo[]>([]);
+  const [accountAndApps, setAccountAndApps] = createSignal<{
+    account: Account;
+    apprepos: Apprepo[];
+  }>();
   const [headerModalShown, setHeaderModalShown] = createSignal<string>();
-  const [isLoadingGetAccount, setIsLoadingGetAccount] = createSignal(false);
+  const [isLoadingGetAccountAndApps, setIsLoadingGetAccountAndApps] =
+    createSignal(false);
   const [isLoadingDeleteAccount, setIsLoadingDeleteAccount] =
     createSignal(false);
-  const [isLoadingGetApps, setIsLoadingGetApps] = createSignal(false);
 
-  async function getAccount() {
+  async function getAccountAndApps() {
     try {
-      setIsLoadingGetAccount(true);
+      setIsLoadingGetAccountAndApps(true);
 
       const result = await GqlClient.client.query<{
         account: Account;
+        apprepos: Apprepo[];
       }>({
         query: gql`
-          query Account {
+          query AccountAndApprepos {
             account {
               email
+            }
+            apprepos {
+              name
+              icon
+              link
             }
           }
         `,
@@ -48,50 +56,21 @@ export default function MainScreen() {
         return;
       }
 
-      if (!result.data.account.email) throw result.errors;
+      if (!result.data.account.email || !result.data.apprepos)
+        throw result.errors;
 
-      setAccount(result.data.account);
+      setAccountAndApps(result.data);
     } catch (e) {
       showGqlError(e);
     } finally {
-      setIsLoadingGetAccount(false);
-    }
-  }
-
-  async function getApps() {
-    try {
-      setIsLoadingGetApps(true);
-
-      const result = await GqlClient.client.query<{
-        apprepos: Apprepo[];
-      }>({
-        query: gql`
-          query Apprepos {
-            apprepos {
-              name
-              icon
-              link
-            }
-          }
-        `,
-        fetchPolicy: "cache-first",
-      });
-
-      if (!result.data.apprepos) throw result.errors;
-
-      setApps(result.data.apprepos);
-    } catch (e) {
-      showGqlError(e);
-    } finally {
-      setIsLoadingGetAccount(false);
+      setIsLoadingGetAccountAndApps(false);
     }
   }
 
   createRenderEffect(() => {
     SiteHead.title = undefined;
 
-    getAccount();
-    getApps();
+    getAccountAndApps();
   });
 
   async function deleteAccount() {
@@ -183,16 +162,18 @@ export default function MainScreen() {
               <div
                 class="w-8 h-8 mx-auto flex items-center justify-center text-white rounded-full overflow-hidden"
                 style={{
-                  "background-color": account()?.email
-                    ? getBgProfilePicture(account()!.email[0].toUpperCase())
+                  "background-color": accountAndApps()?.account.email
+                    ? getBgProfilePicture(
+                        accountAndApps()!.account.email[0].toUpperCase()
+                      )
                     : "transparent",
                 }}
               >
                 <Show
-                  when={account()?.email}
+                  when={accountAndApps()?.account.email}
                   fallback={<LoadingSkeleton width="100%" height="100%" />}
                 >
-                  {account()?.email[0].toUpperCase()}
+                  {accountAndApps()?.account.email[0].toUpperCase()}
                 </Show>
               </div>
             </button>
@@ -209,21 +190,23 @@ export default function MainScreen() {
             <div
               class="w-24 h-24 mx-auto flex items-center justify-center text-6xl text-white rounded-full overflow-hidden"
               style={{
-                "background-color": account()?.email
-                  ? getBgProfilePicture(account()!.email[0].toUpperCase())
+                "background-color": accountAndApps()?.account.email
+                  ? getBgProfilePicture(
+                      accountAndApps()!.account.email[0].toUpperCase()
+                    )
                   : "transparent",
               }}
             >
               <Show
-                when={account()?.email}
+                when={accountAndApps()?.account.email}
                 fallback={<LoadingSkeleton width="100%" height="100%" />}
               >
-                {account()?.email[0].toUpperCase()}
+                {accountAndApps()?.account.email[0].toUpperCase()}
               </Show>
             </div>
             <div class="mt-4">
               <Show
-                when={account()?.email}
+                when={accountAndApps()?.account.email}
                 fallback={
                   <div class="w-fit mx-auto rounded overflow-hidden">
                     <LoadingSkeleton width="300px" height="32px" />
@@ -231,7 +214,7 @@ export default function MainScreen() {
                 }
               >
                 <span class="mx-auto block font-bold text-2xl text-center">
-                  {account()!.email}
+                  {accountAndApps()!.account.email}
                 </span>
               </Show>
             </div>
@@ -342,21 +325,23 @@ export default function MainScreen() {
                   <div
                     class="flex-none w-16 h-16 mx-auto flex items-center justify-center text-4xl text-white rounded-full overflow-hidden"
                     style={{
-                      "background-color": account()?.email
-                        ? getBgProfilePicture(account()!.email[0].toUpperCase())
+                      "background-color": accountAndApps()?.account.email
+                        ? getBgProfilePicture(
+                            accountAndApps()!.account.email[0].toUpperCase()
+                          )
                         : "transparent",
                     }}
                   >
                     <Show
-                      when={account()?.email}
+                      when={accountAndApps()?.account.email}
                       fallback={<LoadingSkeleton width="100%" height="100%" />}
                     >
-                      {account()?.email[0].toUpperCase()}
+                      {accountAndApps()?.account.email[0].toUpperCase()}
                     </Show>
                   </div>
                   <div class="min-w-0 flex-1">
                     <Show
-                      when={account()?.email}
+                      when={accountAndApps()?.account.email}
                       fallback={
                         <div class="mx-auto rounded overflow-hidden">
                           <LoadingSkeleton width="100%" height="24px" />
@@ -364,7 +349,7 @@ export default function MainScreen() {
                       }
                     >
                       <span class="mx-auto block font-bold truncate">
-                        {account()!.email}
+                        {accountAndApps()!.account.email}
                       </span>
                     </Show>
                   </div>
@@ -406,7 +391,7 @@ export default function MainScreen() {
               class={`max-h-96 py-2 px-3 overflow-y-auto ${styles["custom-scrollbar"]}`}
             >
               <div class="grid grid-cols-3">
-                <For each={apps()}>
+                <For each={accountAndApps()?.apprepos}>
                   {(app) => (
                     <div class="w-24 p-2 aspect-square">
                       <Link

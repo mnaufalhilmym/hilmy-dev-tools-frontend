@@ -20,16 +20,18 @@ import styles from "./MainWrapper.module.css";
 export default function MainWrapper() {
   const location = useLocation();
   const [params, setParams] = useSearchParams<{ token?: string }>();
-  const [account, setAccount] = createSignal<Account>();
-  const [apps, setApps] = createSignal<Apprepo[]>([]);
+  const [accountAndApps, setAccountAndApps] = createSignal<{
+    account: Account;
+    apprepos: Apprepo[];
+  }>();
   const [headerModalShown, setHeaderModalShown] = createSignal<string>();
   const [isLoaded, setIsLoaded] = createSignal(false);
-  const [isLoadingGetAccount, setIsLoadingGetAccount] = createSignal(false);
-  const [isLoadingGetApps, setIsLoadingGetApps] = createSignal(false);
+  const [isLoadingGetAccountAndApps, setIsLoadingGetAccountAndApps] =
+    createSignal(false);
 
   async function getAccountAndApps() {
     try {
-      setIsLoadingGetAccount(true);
+      setIsLoadingGetAccountAndApps(true);
 
       const result = await GqlClient.client.query<{
         account: Account;
@@ -53,12 +55,11 @@ export default function MainWrapper() {
       if (!result.data.account.email || !result.data.apprepos)
         throw result.errors;
 
-      setAccount(result.data.account);
-      setApps(result.data.apprepos);
+      setAccountAndApps(result.data);
     } catch (e) {
       showGqlError(e);
     } finally {
-      setIsLoadingGetAccount(false);
+      setIsLoadingGetAccountAndApps(false);
     }
   }
 
@@ -150,16 +151,18 @@ export default function MainWrapper() {
               <div
                 class="w-8 h-8 mx-auto flex items-center justify-center text-white rounded-full overflow-hidden"
                 style={{
-                  "background-color": account()?.email
-                    ? getBgProfilePicture(account()!.email[0].toUpperCase())
+                  "background-color": accountAndApps()?.account.email
+                    ? getBgProfilePicture(
+                        accountAndApps()!.account.email[0].toUpperCase()
+                      )
                     : "transparent",
                 }}
               >
                 <Show
-                  when={account()?.email}
+                  when={accountAndApps()?.account.email}
                   fallback={<LoadingSkeleton width="100%" height="100%" />}
                 >
-                  {account()?.email[0].toUpperCase()}
+                  {accountAndApps()?.account.email[0].toUpperCase()}
                 </Show>
               </div>
             </button>
@@ -216,21 +219,23 @@ export default function MainWrapper() {
                   <div
                     class="flex-none w-16 h-16 mx-auto flex items-center justify-center text-4xl text-white rounded-full overflow-hidden"
                     style={{
-                      "background-color": account()?.email
-                        ? getBgProfilePicture(account()!.email[0].toUpperCase())
+                      "background-color": accountAndApps()?.account.email
+                        ? getBgProfilePicture(
+                            accountAndApps()!.account.email[0].toUpperCase()
+                          )
                         : "transparent",
                     }}
                   >
                     <Show
-                      when={account()?.email}
+                      when={accountAndApps()?.account.email}
                       fallback={<LoadingSkeleton width="100%" height="100%" />}
                     >
-                      {account()?.email[0].toUpperCase()}
+                      {accountAndApps()?.account.email[0].toUpperCase()}
                     </Show>
                   </div>
                   <div class="min-w-0 flex-1">
                     <Show
-                      when={account()?.email}
+                      when={accountAndApps()?.account.email}
                       fallback={
                         <div class="mx-auto rounded overflow-hidden">
                           <LoadingSkeleton width="100%" height="24px" />
@@ -238,7 +243,7 @@ export default function MainWrapper() {
                       }
                     >
                       <span class="mx-auto block font-bold truncate">
-                        {account()!.email}
+                        {accountAndApps()!.account.email}
                       </span>
                     </Show>
                   </div>
@@ -280,7 +285,7 @@ export default function MainWrapper() {
               class={`max-h-96 py-2 px-3 overflow-y-auto ${styles["custom-scrollbar"]}`}
             >
               <div class="grid grid-cols-3">
-                <For each={apps()}>
+                <For each={accountAndApps()?.apprepos}>
                   {(app) => (
                     <div class="w-24 p-2 aspect-square">
                       <Link

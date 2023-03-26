@@ -1,5 +1,6 @@
 import { ApolloError } from "@apollo/client/core";
 import toast from "solid-toast";
+import getGqlErrorMsg from "./getGqlErrorMsg";
 
 export default function showGqlError(e: any) {
   if (import.meta.env.DEV) {
@@ -7,13 +8,7 @@ export default function showGqlError(e: any) {
   }
   let error: string;
   if (e instanceof ApolloError) {
-    error =
-      e.message
-        .split(",")[1]
-        ?.split('"')
-        .slice(1, -1)
-        .join(" ")
-        .replaceAll("\\", "") ?? e.message;
+    error = getGqlErrorMsg(e);
   } else {
     error = e as string;
   }
