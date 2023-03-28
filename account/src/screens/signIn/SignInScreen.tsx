@@ -1,13 +1,14 @@
 import { gql } from "@apollo/client/core";
 import { Link, useNavigate } from "@solidjs/router";
-import { createRenderEffect, createSignal } from "solid-js";
+import { createRenderEffect, createSignal, Show } from "solid-js";
 import GqlClient from "../../api/gqlClient";
 import ConfirmButton from "../../components/button/ConfirmButton";
 import EmailTextField from "../../components/form/EmailTextField";
 import PasswordTextField from "../../components/form/PasswordTextField";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import SiteHead from "../../data/siteHead";
 import SitePath from "../../data/sitePath";
-import { deleteCookie, saveCookie } from "../../helpers/cookie";
+import { saveCookie } from "../../helpers/cookie";
 import showGqlError from "../../helpers/showGqlError";
 
 export default function SignInScreen() {
@@ -115,7 +116,18 @@ export default function SignInScreen() {
               >
                 Create account
               </Link>
-              <ConfirmButton type="submit">Sign in</ConfirmButton>
+              <ConfirmButton type="submit">
+                <Show
+                  when={!isLoadingSignIn()}
+                  fallback={
+                    <div class="p-0.5">
+                      <LoadingSpinner />
+                    </div>
+                  }
+                >
+                  Sign in
+                </Show>
+              </ConfirmButton>
             </div>
           </form>
         </div>

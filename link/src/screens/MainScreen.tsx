@@ -165,7 +165,7 @@ export default function MainScreen() {
   return (
     <div class="min-h-full px-4 flex gap-x-4">
       <div class="flex-[2] max-w-2xl pb-8">
-        <div class="pt-1">
+        <div class="pt-4 sm:pt-1">
           <span class="text-2xl">Simplify your links</span>
         </div>
         <form onsubmit={createShortUrl} class="mt-8">
@@ -240,7 +240,7 @@ export default function MainScreen() {
       <div class="hidden sm:block flex-1 max-w-[33%]">
         <Show when={recentlyCreatedLinks().length > 0}>
           <div class="h-full pl-4 pb-8 border-l">
-            <div class="pt-1">
+            <div class="pt-4 sm:pt-1">
               <span class="text-2xl">Recently created links</span>
             </div>
             <div class="mt-8 space-y-6">
@@ -252,7 +252,7 @@ export default function MainScreen() {
                     class="block w-full text-left"
                   >
                     <div class="flex">
-                      <span class="text-xs text-black/70 line-clamp-1">
+                      <span class="text-xs text-black/70 truncate">
                         {moment
                           .utc(link.createdAt)
                           .local()
@@ -261,20 +261,20 @@ export default function MainScreen() {
                       </span>
                     </div>
                     <div class="my-0.5">
-                      <span class="line-clamp-1">{link.title}</span>
+                      <span class="truncate">{link.title}</span>
                     </div>
                     <div class="text-sm">
                       <div class="flex text-teal-500">
                         <span>{`${
                           import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN
                         }/`}</span>
-                        <span class="line-clamp-1">{link.shortUrl}</span>
+                        <span class="truncate">{link.shortUrl}</span>
                       </div>
                       <div class="flex gap-x-1">
                         <span class="flex pt-[1.5px]">
                           <SuBdirectoryArrowRightIcon />
                         </span>
-                        <span class="line-clamp-1">{link.longUrl}</span>
+                        <span class="truncate">{link.longUrl}</span>
                       </div>
                     </div>
                   </button>

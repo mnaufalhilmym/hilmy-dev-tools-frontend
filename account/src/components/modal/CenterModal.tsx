@@ -67,9 +67,11 @@ export class CenterModal {
       >
         <div
           onclick={stopPropagation}
-          class={`max-w-full max-h-full mx-auto p-6 sm:p-8 bg-white border rounded-xl drop-shadow-lg overflow-auto ${styles["custom-scrollbar"]}`}
+          class="max-w-full max-h-full mx-auto bg-white border rounded-xl drop-shadow-lg overflow-hidden"
         >
-          {this._getContent()}
+          <div class={`p-6 sm:p-8 overflow-auto ${styles["custom-scrollbar"]}`}>
+            {this._getContent()}
+          </div>
         </div>
       </div>
     );

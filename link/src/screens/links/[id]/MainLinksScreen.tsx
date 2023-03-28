@@ -246,10 +246,10 @@ export default function MainLinksScreen() {
   return (
     <>
       <div class="w-full h-full flex flex-col">
-        <div class="px-4 pt-1">
+        <div class="px-4 pt-4 sm:pt-1">
           <span class="text-2xl">Links</span>
         </div>
-        <div class="relative h-full mt-4 border-t">
+        <div class="relative h-full mt-4 sm:border-t">
           <div class="absolute h-full w-full flex">
             <div
               class={`flex-1 h-full sm:max-w-[18rem] overflow-y-auto border-r ${styles["custom-scrollbar"]}`}
@@ -531,7 +531,7 @@ export default function MainLinksScreen() {
                   <Link href={SitePath.homePath} class="text-teal-500">
                     + Create
                   </Link>{" "}
-                  button in the sidebar to get started.
+                  button in the menu to get started.
                 </span>
               </div>
             </div>
