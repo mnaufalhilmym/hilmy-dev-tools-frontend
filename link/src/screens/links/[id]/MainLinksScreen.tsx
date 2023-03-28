@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client/core";
+import { createWindowSize } from "@solid-primitives/resize-observer";
 import { Link, useNavigate, useParams } from "@solidjs/router";
 import moment from "moment";
 import { createRenderEffect, createSignal, For, Show } from "solid-js";
@@ -23,6 +24,7 @@ import LinkT from "../../../types/link.type";
 import styles from "./MainLinkScreen.module.css";
 
 export default function MainLinksScreen() {
+  const size = createWindowSize();
   const params = useParams<{ id?: string }>();
   const navigate = useNavigate();
   const [links, setLinks] = createSignal<LinkT[]>([]);
@@ -31,6 +33,14 @@ export default function MainLinksScreen() {
   const [textEdit, setTextEdit] = createSignal<string>();
   const [isLoadingGetLinks, setIsLoadingGetLinks] = createSignal(false);
   const [isLoadingExecute, setIsLoadingExecute] = createSignal(false);
+
+  const CenterModalLayer1 = new CenterModal({
+    cancelCallback: () => {
+      navigate(SitePath.linksPath);
+      setIsEditing();
+    },
+  });
+  const CenterModalLayer2 = new CenterModal();
 
   async function getLinks() {
     try {
@@ -77,6 +87,19 @@ export default function MainLinksScreen() {
       }
     } else {
       setSelectedLink();
+    }
+  });
+
+  function showModalDetailLink() {
+    CenterModalLayer1.content = ModalDetailLink();
+    CenterModalLayer1.isShow = true;
+  }
+
+  createRenderEffect(() => {
+    if (selectedLink()?.id && size.width < 640) {
+      showModalDetailLink();
+    } else if (size.width >= 640) {
+      CenterModalLayer1.isShow = false;
     }
   });
 
@@ -216,235 +239,254 @@ export default function MainLinksScreen() {
   }
 
   function showModalDeleteLink() {
-    CenterModal.content = ModalDeleteLink();
-    CenterModal.isShow = true;
+    CenterModalLayer2.content = ModalDeleteLink();
+    CenterModalLayer2.isShow = true;
   }
 
   return (
-    <div class="w-full h-full flex flex-col">
-      <div class="px-4 pt-1">
-        <span class="text-2xl">Links</span>
-      </div>
-      <div class="relative h-full mt-4 border-t">
-        <div class="absolute h-full w-full flex">
-          <div
-            class={`flex-none h-full w-72 overflow-y-auto border-r ${styles["custom-scrollbar"]}`}
-          >
-            <For each={links()} fallback={<LinksFallback />}>
-              {(link) => (
-                <Link
-                  href={`${SitePath.linksPath}/${link.id}`}
-                  class="block p-2"
-                  classList={{ "bg-teal-100": params.id === link.id }}
-                >
-                  <div class="flex">
-                    <span class="text-xs text-black/70">
-                      {moment
-                        .utc(link.createdAt)
-                        .local()
-                        .format("MMM DD, YYYY")
-                        .toUpperCase()}
-                    </span>
-                  </div>
-                  <div class="my-0.5">
-                    <span class="block truncate">{link.title}</span>
-                  </div>
-                  <div class="flex gap-x-2 justify-between text-sm">
-                    <div class="flex-1 text-teal-500 truncate">
-                      <span>{`${
-                        import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN
-                      }/`}</span>
-                      <span class="font-bold">{link.shortUrl}</span>
-                    </div>
-                    <div class="flex-none flex items-center gap-x-1 text-black/50">
-                      <span>{link.visits}</span>
-                      <span class="flex text-base pt-[2px]">
-                        <VisibilityIcon />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              )}
-            </For>
-          </div>
-
-          <Show when={selectedLink()?.id} fallback={<DetailLinkFallback />}>
+    <>
+      <div class="w-full h-full flex flex-col">
+        <div class="px-4 pt-1">
+          <span class="text-2xl">Links</span>
+        </div>
+        <div class="relative h-full mt-4 border-t">
+          <div class="absolute h-full w-full flex">
             <div
-              class={`flex-1 h-full p-4 overflow-y-auto ${styles["custom-scrollbar"]}`}
+              class={`flex-1 h-full sm:max-w-[18rem] overflow-y-auto border-r ${styles["custom-scrollbar"]}`}
             >
-              <div class="p-4 border rounded-lg">
-                <div class="flex items-center justify-between gap-x-2.5">
-                  <div class="min-w-0 flex-1">
-                    <Show when={isEditing() !== "title"}>
-                      <span class="block font-bold text-xl truncate">
-                        {selectedLink()!.title}
-                      </span>
-                    </Show>
-                    <Show when={isEditing() === "title"}>
-                      <input
-                        value={textEdit()}
-                        oninput={(e) => setTextEdit(e.currentTarget.value)}
-                        class="w-full px-2 py-0.5 outline-none border border-teal-500 rounded"
-                      />
-                    </Show>
-                  </div>
-                  <Show when={isEditing() !== "title"}>
-                    <div class="flex gap-x-1">
-                      <button
-                        type="button"
-                        onclick={() => editMode("title")}
-                        class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
-                      >
-                        <span class="flex text-2xl">
-                          <EditIcon />
-                        </span>
-                        <span class="text-sm">Edit</span>
-                      </button>
-                      <button
-                        type="button"
-                        onclick={showModalDeleteLink}
-                        class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-red-100 rounded-lg"
-                      >
-                        <span class="flex text-2xl">
-                          <DeleteIcon />
-                        </span>
-                        <span class="text-sm">Delete</span>
-                      </button>
-                    </div>
-                  </Show>
-                  <Show when={isEditing() === "title"}>
-                    <div class="flex gap-x-1">
-                      <button
-                        type="button"
-                        onclick={saveEditedShortLink}
-                        class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
-                      >
-                        <span class="flex text-2xl">
-                          <SaveIcon />
-                        </span>
-                        <span class="text-sm">Save</span>
-                      </button>
-                      <button
-                        type="button"
-                        onclick={() => editMode()}
-                        class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-red-100 rounded-lg"
-                      >
-                        <span class="flex text-2xl">
-                          <CancelIcon />
-                        </span>
-                        <span class="text-sm">Cancel</span>
-                      </button>
-                    </div>
-                  </Show>
-                </div>
-                <div class="mt-2 flex items-center gap-x-1 text-sm">
-                  <CalendarMonth />
-                  <span>
-                    {moment
-                      .utc(selectedLink()!.createdAt)
-                      .local()
-                      .format("MMMM DD, YYYY hh:mm A Z")}
-                  </span>
-                </div>
-                <div class="mt-2 flex items-center gap-x-1 text-sm">
-                  <span class="flex pt-[1px]">
-                    <VisibilityIcon />
-                  </span>
-                  <span>{selectedLink()!.visits}</span>
-                  <span> click{selectedLink()!.visits !== 1 ? "s" : ""}</span>
-                </div>
-              </div>
-              <div class="mt-4 p-4 border rounded-lg">
-                <div class="flex items-center justify-between gap-x-2.5">
-                  <div class="min-w-0 flex-1">
-                    <Show when={isEditing() !== "short_url"}>
-                      <Link
-                        href={selectedLink()!.longUrl}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                        class="block font-bold text-xl text-teal-500 truncate"
-                      >
-                        {import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/
-                        {selectedLink()!.shortUrl}
-                      </Link>
-                    </Show>
-                    <Show when={isEditing() === "short_url"}>
-                      <div class="px-2 py-0.5 flex items-center border border-teal-500 rounded">
-                        <span>
-                          {import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/
-                        </span>
-                        <input
-                          value={textEdit()}
-                          oninput={(e) => setTextEdit(e.currentTarget.value)}
-                          class="w-full outline-none"
-                        />
-                      </div>
-                    </Show>
-                  </div>
-                  <Show when={isEditing() !== "short_url"}>
-                    <div class="flex gap-x-1">
-                      <button
-                        type="button"
-                        onclick={copyShortUrl}
-                        class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
-                      >
-                        <span class="flex text-2xl">
-                          <ContentCopyIcon />
-                        </span>
-                        <span class="text-sm">Copy</span>
-                      </button>
-                      <button
-                        type="button"
-                        onclick={() => editMode("short_url")}
-                        class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
-                      >
-                        <span class="flex text-2xl">
-                          <EditIcon />
-                        </span>
-                        <span class="text-sm">Edit</span>
-                      </button>
-                    </div>
-                  </Show>
-                  <Show when={isEditing() === "short_url"}>
-                    <div class="flex gap-x-1">
-                      <button
-                        type="button"
-                        onclick={saveEditedShortLink}
-                        class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
-                      >
-                        <span class="flex text-2xl">
-                          <SaveIcon />
-                        </span>
-                        <span class="text-sm">Save</span>
-                      </button>
-                      <button
-                        type="button"
-                        onclick={() => editMode()}
-                        class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-red-100 rounded-lg"
-                      >
-                        <span class="flex text-2xl">
-                          <CancelIcon />
-                        </span>
-                        <span class="text-sm">Cancel</span>
-                      </button>
-                    </div>
-                  </Show>
-                </div>
-                <div class="mt-2 flex items-center gap-x-1 text-sm">
-                  <span class="flex pb-0.5">
-                    <SuBdirectoryArrowRightIcon />
-                  </span>
-                  <Link href={selectedLink()!.longUrl}>
-                    {selectedLink()!.longUrl}
-                  </Link>
-                </div>
+              <SidebarLink />
+            </div>
+
+            <div class="hidden sm:block min-w-0 flex-[2]">
+              <div
+                class={`h-full sm:p-4 overflow-y-auto ${styles["custom-scrollbar"]}`}
+              >
+                <DetailLink />
               </div>
             </div>
-          </Show>
+          </div>
         </div>
       </div>
-    </div>
+
+      {CenterModalLayer1.render()}
+      {CenterModalLayer2.render()}
+    </>
   );
+
+  function SidebarLink() {
+    return (
+      <For each={links()} fallback={<LinksFallback />}>
+        {(link) => (
+          <Link
+            href={`${SitePath.linksPath}/${link.id}`}
+            class="block p-2"
+            classList={{ "sm:bg-teal-100": params.id === link.id }}
+          >
+            <div class="flex">
+              <span class="text-xs text-black/70">
+                {moment
+                  .utc(link.createdAt)
+                  .local()
+                  .format("MMM DD, YYYY")
+                  .toUpperCase()}
+              </span>
+            </div>
+            <div class="my-0.5">
+              <span class="block truncate">{link.title}</span>
+            </div>
+            <div class="flex gap-x-2 justify-between text-sm">
+              <div class="flex-1 text-teal-500 truncate">
+                <span>{`${
+                  import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN
+                }/`}</span>
+                <span class="font-bold">{link.shortUrl}</span>
+              </div>
+              <div class="flex-none flex items-center gap-x-1 text-black/50">
+                <span>{link.visits}</span>
+                <span class="flex text-base pt-[2px]">
+                  <VisibilityIcon />
+                </span>
+              </div>
+            </div>
+          </Link>
+        )}
+      </For>
+    );
+  }
+
+  function DetailLink() {
+    return (
+      <Show when={selectedLink()?.id} fallback={<DetailLinkFallback />}>
+        <div class="p-4 border rounded-lg">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+            <div class="min-w-0 flex-1">
+              <Show when={isEditing() !== "title"}>
+                <span class="block font-bold text-xl truncate">
+                  {selectedLink()!.title}
+                </span>
+              </Show>
+              <Show when={isEditing() === "title"}>
+                <input
+                  value={textEdit()}
+                  oninput={(e) => setTextEdit(e.currentTarget.value)}
+                  class="w-full px-2 py-[1px] outline-none border border-teal-500 rounded"
+                />
+              </Show>
+            </div>
+            <Show when={isEditing() !== "title"}>
+              <div class="flex gap-x-1">
+                <button
+                  type="button"
+                  onclick={() => editMode("title")}
+                  class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
+                >
+                  <span class="flex text-2xl">
+                    <EditIcon />
+                  </span>
+                  <span class="text-sm">Edit</span>
+                </button>
+                <button
+                  type="button"
+                  onclick={showModalDeleteLink}
+                  class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-red-100 rounded-lg"
+                >
+                  <span class="flex text-2xl">
+                    <DeleteIcon />
+                  </span>
+                  <span class="text-sm">Delete</span>
+                </button>
+              </div>
+            </Show>
+            <Show when={isEditing() === "title"}>
+              <div class="flex gap-x-1">
+                <button
+                  type="button"
+                  onclick={saveEditedShortLink}
+                  class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
+                >
+                  <span class="flex text-2xl">
+                    <SaveIcon />
+                  </span>
+                  <span class="text-sm">Save</span>
+                </button>
+                <button
+                  type="button"
+                  onclick={() => editMode()}
+                  class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-red-100 rounded-lg"
+                >
+                  <span class="flex text-2xl">
+                    <CancelIcon />
+                  </span>
+                  <span class="text-sm">Cancel</span>
+                </button>
+              </div>
+            </Show>
+          </div>
+          <div class="mt-4 sm:mt-2 flex items-center gap-x-1 text-sm">
+            <CalendarMonth />
+            <span>
+              {moment
+                .utc(selectedLink()!.createdAt)
+                .local()
+                .format("MMMM DD, YYYY hh:mm A Z")}
+            </span>
+          </div>
+          <div class="mt-2 flex items-center gap-x-1 text-sm">
+            <span class="flex pt-[1px]">
+              <VisibilityIcon />
+            </span>
+            <span>{selectedLink()!.visits}</span>
+            <span> click{selectedLink()!.visits !== 1 ? "s" : ""}</span>
+          </div>
+        </div>
+        <div class="mt-4 p-4 border rounded-lg">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+            <div class="min-w-0 flex-1">
+              <Show when={isEditing() !== "short_url"}>
+                <Link
+                  href={selectedLink()!.longUrl}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  class="block font-bold text-xl text-teal-500 truncate"
+                >
+                  {import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/
+                  {selectedLink()!.shortUrl}
+                </Link>
+              </Show>
+              <Show when={isEditing() === "short_url"}>
+                <div class="px-2 py-[1px] flex items-center border border-teal-500 rounded">
+                  <span>
+                    {import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/
+                  </span>
+                  <input
+                    value={textEdit()}
+                    oninput={(e) => setTextEdit(e.currentTarget.value)}
+                    class="w-full outline-none"
+                  />
+                </div>
+              </Show>
+            </div>
+            <Show when={isEditing() !== "short_url"}>
+              <div class="flex gap-x-1">
+                <button
+                  type="button"
+                  onclick={copyShortUrl}
+                  class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
+                >
+                  <span class="flex text-2xl">
+                    <ContentCopyIcon />
+                  </span>
+                  <span class="text-sm">Copy</span>
+                </button>
+                <button
+                  type="button"
+                  onclick={() => editMode("short_url")}
+                  class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
+                >
+                  <span class="flex text-2xl">
+                    <EditIcon />
+                  </span>
+                  <span class="text-sm">Edit</span>
+                </button>
+              </div>
+            </Show>
+            <Show when={isEditing() === "short_url"}>
+              <div class="flex gap-x-1">
+                <button
+                  type="button"
+                  onclick={saveEditedShortLink}
+                  class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-teal-100 rounded-lg"
+                >
+                  <span class="flex text-2xl">
+                    <SaveIcon />
+                  </span>
+                  <span class="text-sm">Save</span>
+                </button>
+                <button
+                  type="button"
+                  onclick={() => editMode()}
+                  class="px-1.5 py-1 flex items-center gap-x-0.5 hover:bg-red-100 rounded-lg"
+                >
+                  <span class="flex text-2xl">
+                    <CancelIcon />
+                  </span>
+                  <span class="text-sm">Cancel</span>
+                </button>
+              </div>
+            </Show>
+          </div>
+          <div class="mt-4 sm:mt-2 flex items-center gap-x-1 text-sm">
+            <span class="hidden sm:block flex pt-[1px]">
+              <SuBdirectoryArrowRightIcon />
+            </span>
+            <Link href={selectedLink()!.longUrl} class="truncate">
+              {selectedLink()!.longUrl}
+            </Link>
+          </div>
+        </div>
+      </Show>
+    );
+  }
 
   function LinksFallback() {
     return (
@@ -521,20 +563,26 @@ export default function MainLinksScreen() {
     );
   }
 
+  function ModalDetailLink() {
+    return <DetailLink />;
+  }
+
   function ModalDeleteLink() {
     function cancel() {
-      CenterModal.isShow = false;
+      CenterModalLayer2.isShow = false;
     }
 
     async function delLink() {
-      CenterModal.isShow = false;
+      CenterModalLayer2.isShow = false;
       await deleteLink();
     }
 
     return (
       <div>
         <div>
-          <span>Are you sure you want to delete {selectedLink()?.title}?</span>
+          <span>
+            Are you sure you want to delete {/* @once */ selectedLink()?.title}?
+          </span>
         </div>
         <div class="mt-4 flex justify-between">
           <button

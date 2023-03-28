@@ -169,12 +169,57 @@ export default function MainWrapper() {
           </div>
         </div>
 
+        <div class="block md:hidden flex gap-x-2 border-b">
+          <Link href={SitePath.homePath} class="px-4">
+            <div class="relative py-2">
+              <div
+                class="flex items-center gap-x-1 hover:text-teal-500"
+                classList={{
+                  "text-teal-500": location.pathname === SitePath.homePath,
+                }}
+              >
+                <span class="flex text-2xl">
+                  <AddIcon />
+                </span>
+                <span>Create</span>
+              </div>
+              <Show when={location.pathname === SitePath.homePath}>
+                <div class="absolute w-full bottom-0">
+                  <div class="w-full h-[3px] mx-1 bg-teal-500 rounded-t-full" />
+                </div>
+              </Show>
+            </div>
+          </Link>
+          <Link href={SitePath.linksPath} class="px-4">
+            <div class="relative py-2">
+              <div
+                class="flex items-center gap-x-1 hover:text-teal-500"
+                classList={{
+                  "text-teal-500": location.pathname.startsWith(
+                    SitePath.linksPath
+                  ),
+                }}
+              >
+                <span class="flex text-2xl">
+                  <LinkIcon />
+                </span>
+                <span>Links</span>
+              </div>
+              <Show when={location.pathname.startsWith(SitePath.linksPath)}>
+                <div class="absolute w-full bottom-0">
+                  <div class="w-full h-[3px] mx-1 bg-teal-500 rounded-t-full" />
+                </div>
+              </Show>
+            </div>
+          </Link>
+        </div>
+
         <ModalApps />
         <ModalAccount />
       </div>
 
-      <div class="h-screen pt-16 flex">
-        <div class="h-full pr-4 border-r space-y-2">
+      <div class="h-screen pt-[105px] md:pt-16 flex">
+        <div class="hidden md:block h-full pr-4 border-r space-y-2">
           <Link
             href={SitePath.homePath}
             class="w-full py-2 pl-8 pr-16 flex items-center gap-x-2 hover:bg-teal-50 rounded-r-full"
@@ -201,7 +246,7 @@ export default function MainWrapper() {
           </Link>
         </div>
 
-        <div class="relative w-full">
+        <div class="w-full overflow-y-auto">
           <Outlet />
         </div>
       </div>

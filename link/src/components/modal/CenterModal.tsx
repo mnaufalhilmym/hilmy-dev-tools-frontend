@@ -1,79 +1,77 @@
-import {
-  Accessor,
-  createRenderEffect,
-  createSignal,
-  JSXElement,
-  Setter,
-} from "solid-js";
+import { Accessor, createSignal, JSXElement, Setter } from "solid-js";
+import styles from "./CenterModal.module.css";
+
+interface Config {
+  cancelCallback?: () => void;
+}
 
 export class CenterModal {
-  private static _getIsShow: Accessor<boolean>;
-  private static _setIsShow: Setter<boolean>;
-  private static _getContent: Accessor<JSXElement>;
-  private static _setContent: Setter<JSXElement>;
+  private _getIsShow: Accessor<boolean>;
+  private _setIsShow: Setter<boolean>;
+  private _getContent: Accessor<JSXElement>;
+  private _setContent: Setter<JSXElement>;
+  private _config: Config | undefined;
 
-  static init() {
+  constructor(config?: Config) {
+    this._config = config;
     [this._getIsShow, this._setIsShow] = createSignal(false);
     [this._getContent, this._setContent] = createSignal();
   }
 
-  static get isShow(): any {
+  get isShow(): any {
     return this._getIsShow;
   }
 
-  static set isShow(state: boolean) {
+  set isShow(state: boolean) {
     this._setIsShow(state);
   }
 
-  static get content(): any {
+  get content(): any {
     return this._getContent;
   }
 
-  static set content(content: JSXElement | undefined) {
+  set content(content: JSXElement | undefined) {
     this._setContent(content);
   }
-}
 
-export function CenterModalWrapper() {
-  createRenderEffect(() => {
-    CenterModal.init();
-  });
+  render() {
+    const closeModal = () => {
+      this.isShow = false;
+      this._config?.cancelCallback?.();
+    };
 
-  function closeModal() {
-    CenterModal.isShow = false;
-  }
-
-  function stopPropagation(
-    e: MouseEvent & {
-      currentTarget: HTMLDivElement;
-      target: Element;
+    function stopPropagation(
+      e: MouseEvent & {
+        currentTarget: HTMLDivElement;
+        target: Element;
+      }
+    ) {
+      e.stopPropagation();
     }
-  ) {
-    e.stopPropagation();
-  }
 
-  function onTransitionEnd() {
-    if (!CenterModal.isShow()) {
-      CenterModal.content = undefined;
-    }
-  }
+    const onTransitionEnd = () => {
+      if (!this.isShow()) {
+        this.content = undefined;
+      }
+    };
 
-  return (
-    <div
-      onclick={closeModal}
-      class="fixed w-screen h-screen top-0 right-0 bottom-0 left-0 p-10 flex items-center bg-black/30 opacity-0 transition-all duration-200"
-      classList={{
-        invisible: !CenterModal.isShow(),
-        "opacity-100": CenterModal.isShow(),
-      }}
-      ontransitionend={onTransitionEnd}
-    >
+    return (
       <div
-        onclick={stopPropagation}
-        class="mx-auto p-8 bg-white border rounded-xl drop-shadow-lg"
+        onclick={closeModal}
+        class="fixed z-50 w-screen h-screen top-0 right-0 bottom-0 left-0 p-4 sm:p-10 flex items-center bg-black/30 opacity-0 transition-all duration-200"
+        classList={{
+          invisible: !this.isShow(),
+          "opacity-100": this.isShow(),
+        }}
+        ontransitionend={onTransitionEnd}
       >
-        {CenterModal.content()}
+        <div
+          onclick={stopPropagation}
+          class={`max-w-full max-h-full mx-auto p-6 sm:p-8 bg-white border rounded-xl drop-shadow-lg overflow-auto ${styles["custom-scrollbar"]}`}
+        >
+          {this._getContent()}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }

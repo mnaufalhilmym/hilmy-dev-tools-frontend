@@ -28,6 +28,8 @@ export default function MainScreen() {
   const [isLoadingDeleteAccount, setIsLoadingDeleteAccount] =
     createSignal(false);
 
+  const CenterModalLayer = new CenterModal();
+
   async function getAccountAndApps() {
     try {
       setIsLoadingGetAccountAndApps(true);
@@ -106,13 +108,13 @@ export default function MainScreen() {
   }
 
   function showModalDeleteAccount() {
-    CenterModal.content = ModalConfirmDeleteAccount();
-    CenterModal.isShow = true;
+    CenterModalLayer.content = ModalConfirmDeleteAccount();
+    CenterModalLayer.isShow = true;
   }
 
   function showModalSignOut() {
-    CenterModal.content = ModalConfirmSignOut();
-    CenterModal.isShow = true;
+    CenterModalLayer.content = ModalConfirmSignOut();
+    CenterModalLayer.isShow = true;
   }
 
   function toggleModalAccount() {
@@ -251,12 +253,14 @@ export default function MainScreen() {
           </div>
         </div>
       </div>
+
+      {CenterModalLayer.render()}
     </>
   );
 
   function ModalConfirmSignOut() {
     function cancel() {
-      CenterModal.isShow = false;
+      CenterModalLayer.isShow = false;
     }
 
     return (
@@ -286,7 +290,7 @@ export default function MainScreen() {
 
   function ModalConfirmDeleteAccount() {
     function cancel() {
-      CenterModal.isShow = false;
+      CenterModalLayer.isShow = false;
     }
 
     return (
