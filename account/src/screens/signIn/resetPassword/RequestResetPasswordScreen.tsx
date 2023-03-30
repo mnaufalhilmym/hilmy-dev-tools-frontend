@@ -71,8 +71,8 @@ export default function RequestResetPasswordScreen() {
   }
 
   return (
-    <div class="min-w-screen min-h-screen flex items-center">
-      <div class="w-full max-w-md mx-auto p-10 border-2 rounded-lg">
+    <div class="min-w-screen min-h-screen flex sm:items-center">
+      <div class="w-full max-w-md mx-auto p-6 sm:p-10 sm:border-2 rounded-lg">
         <div>
           <h1 class="text-2xl text-center">Request reset password</h1>
         </div>

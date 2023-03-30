@@ -1,5 +1,4 @@
 import { gql } from "@apollo/client/core";
-import { Link } from "@solidjs/router";
 import moment from "moment";
 import { createRenderEffect, createSignal, For, Show } from "solid-js";
 import toast from "solid-toast";
@@ -130,6 +129,9 @@ export default function MainScreen() {
       setRecentlyCreatedLinks((prev) => {
         if (result.data?.createLink) {
           const newLinks = [...prev];
+          if (newLinks.length === 3) {
+            newLinks.shift();
+          }
           newLinks.push(result.data.createLink);
           return newLinks;
         }
@@ -145,7 +147,9 @@ export default function MainScreen() {
   }
 
   async function copyClickedLinkToClipboard(shortUrl: string) {
-    await copyToClipboard(shortUrl);
+    await copyToClipboard(
+      `${import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/${shortUrl}`
+    );
     toast.success("Short link successfully copied to clipboard.");
   }
 

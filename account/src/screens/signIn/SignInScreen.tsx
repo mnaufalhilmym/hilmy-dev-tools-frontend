@@ -80,57 +80,55 @@ export default function SignInScreen() {
   }
 
   return (
-    <div class="min-w-screen min-h-screen flex items-center">
-      <div class="w-full max-w-md mx-auto p-10 border-2 rounded-lg">
-        <div class="min-w-[24rem]">
+    <div class="min-w-screen min-h-screen flex sm:items-center">
+      <div class="w-full max-w-md mx-auto p-6 sm:p-10 sm:border-2 rounded-lg">
+        <div>
+          <h1 class="text-2xl text-center">Sign in</h1>
+        </div>
+        <form onsubmit={signIn} class="mt-8">
           <div>
-            <h1 class="text-2xl text-center">Sign in</h1>
-          </div>
-          <form onsubmit={signIn} class="mt-8">
             <div>
               <div>
-                <div>
-                  <EmailTextField name="email" placeholder="Email" required />
-                </div>
-                <div class="mt-2">
-                  <PasswordTextField
-                    name="password"
-                    placeholder="Password"
-                    required
-                  />
-                </div>
+                <EmailTextField name="email" placeholder="Email" required />
               </div>
-              <div class="mt-4">
-                <Link
-                  href={SitePath.requestResetPasswordPath}
-                  class="-ml-1 px-1 py-0.5 active:bg-teal-100 text-teal-500 active:text-teal-600 rounded"
-                >
-                  Reset password
-                </Link>
+              <div class="mt-2">
+                <PasswordTextField
+                  name="password"
+                  placeholder="Password"
+                  required
+                />
               </div>
             </div>
-            <div class="mt-10 -ml-1.5 flex items-center justify-between">
+            <div class="mt-4">
               <Link
-                href={SitePath.signUpPath}
-                class="px-1.5 py-1.5 text-teal-500 hover:text-teal-600 hover:bg-teal-50 active:bg-teal-100 rounded transition-colors duration-200"
+                href={SitePath.requestResetPasswordPath}
+                class="-ml-1 px-1 py-0.5 active:bg-teal-100 text-teal-500 active:text-teal-600 rounded"
               >
-                Create account
+                Reset password
               </Link>
-              <ConfirmButton type="submit">
-                <Show
-                  when={!isLoadingSignIn()}
-                  fallback={
-                    <div class="p-0.5">
-                      <LoadingSpinner />
-                    </div>
-                  }
-                >
-                  Sign in
-                </Show>
-              </ConfirmButton>
             </div>
-          </form>
-        </div>
+          </div>
+          <div class="mt-10 -ml-1.5 flex items-center justify-between">
+            <Link
+              href={SitePath.signUpPath}
+              class="px-1.5 py-1.5 text-teal-500 hover:text-teal-600 hover:bg-teal-50 active:bg-teal-100 rounded transition-colors duration-200"
+            >
+              Create account
+            </Link>
+            <ConfirmButton type="submit">
+              <Show
+                when={!isLoadingSignIn()}
+                fallback={
+                  <div class="p-0.5">
+                    <LoadingSpinner />
+                  </div>
+                }
+              >
+                Sign in
+              </Show>
+            </ConfirmButton>
+          </div>
+        </form>
       </div>
     </div>
   );
