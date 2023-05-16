@@ -96,9 +96,13 @@ export default function MainLinksScreen() {
   }
 
   createRenderEffect(() => {
-    if (selectedLink()?.id && size.width < 640) {
-      showModalDetailLink();
-    } else if (size.width >= 640) {
+    if (size.width < 640) {
+      if (selectedLink()?.id) {
+        showModalDetailLink();
+      } else {
+        CenterModalLayer1.isShow = false;
+      }
+    } else {
       CenterModalLayer1.isShow = false;
     }
   });
@@ -176,8 +180,23 @@ export default function MainLinksScreen() {
           );
         })(),
         {
-          loading: "Updating link title...",
-          success: (val) => <span>Successfully updated the link title</span>,
+          loading: `Updating link${
+            mode === "title"
+              ? " title"
+              : mode === "short_url"
+              ? " short url"
+              : ""
+          }...`,
+          success: (val) => (
+            <span>
+              Successfully updated the link
+              {mode === "title"
+                ? " title"
+                : mode === "short_url"
+                ? " short url"
+                : ""}
+            </span>
+          ),
           error: (e) => <span>{getGqlErrorMsg(e)}</span>,
         }
       );
@@ -479,7 +498,12 @@ export default function MainLinksScreen() {
             <span class="hidden sm:block flex pt-[1px]">
               <SuBdirectoryArrowRightIcon />
             </span>
-            <Link href={selectedLink()!.longUrl} class="truncate">
+            <Link
+              href={selectedLink()!.longUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+              class="truncate"
+            >
               {selectedLink()!.longUrl}
             </Link>
           </div>

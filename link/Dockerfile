@@ -15,8 +15,7 @@ RUN npm run build
 FROM base AS deps-prod
 WORKDIR /app
 COPY --from=deps /app/package.json .
-RUN npm i --omit=dev
-RUN npm i vite@^4.1.1 vite-plugin-solid@^2.5.0
+RUN npm i vite@^4.3.6
 
 FROM base AS runner
 WORKDIR /app

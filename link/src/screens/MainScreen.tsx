@@ -46,7 +46,7 @@ export default function MainScreen() {
       if (!result.data.linkByShortUrl) throw result.errors;
 
       return false;
-    } catch (e) {
+    } catch {
       return true;
     }
   }
@@ -120,25 +120,35 @@ export default function MainScreen() {
       }
       target.short_url.value = "";
 
-      await copyToClipboard(
-        `${import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/${
-          result.data.createLink.shortUrl
-        }`
+      let isCopySuccess = false;
+      try {
+        await copyToClipboard(
+          `${import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/${
+            result.data.createLink.shortUrl
+          }`
+        );
+        isCopySuccess = true;
+      } catch {}
+
+      toast.success(
+        `Short link successfully created${
+          isCopySuccess ? " and copied to clipboard" : ""
+        }.`
       );
 
-      setRecentlyCreatedLinks((prev) => {
-        if (result.data?.createLink) {
-          const newLinks = [...prev];
-          if (newLinks.length === 3) {
-            newLinks.shift();
-          }
-          newLinks.push(result.data.createLink);
-          return newLinks;
+      setRecentlyCreatedLinks(() => {
+        let newLinks: LinkT[] = [];
+        if (recentlyCreatedLinks().length < 3) {
+          newLinks = [...recentlyCreatedLinks(), result.data!.createLink];
+        } else {
+          newLinks = [
+            recentlyCreatedLinks()[1],
+            recentlyCreatedLinks()[2],
+            result.data!.createLink,
+          ];
         }
-        return prev;
+        return newLinks;
       });
-
-      toast.success("Short link successfully created and copied to clipboard.");
     } catch (e) {
       showGqlError(e);
     } finally {
@@ -147,10 +157,14 @@ export default function MainScreen() {
   }
 
   async function copyClickedLinkToClipboard(shortUrl: string) {
-    await copyToClipboard(
-      `${import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/${shortUrl}`
-    );
-    toast.success("Short link successfully copied to clipboard.");
+    try {
+      await copyToClipboard(
+        `${import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/${shortUrl}`
+      );
+      toast.success("Short link successfully copied to clipboard.");
+    } catch (e) {
+      toast.error("Failed to copy the short link.");
+    }
   }
 
   function onInputShortUrl(
