@@ -58,7 +58,7 @@ export default function SignInScreen() {
       if (!result.data?.signIn.token) throw result.errors;
 
       let redirect = sessionStorage.getItem("redirect");
-      if (!!redirect) {
+      if (redirect) {
         sessionStorage.removeItem("redirect");
         if (redirect.includes("?")) {
           redirect += "&";

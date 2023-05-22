@@ -18,7 +18,7 @@ export default class GqlClient {
     this._client = new ApolloClient({
       uri: import.meta.env.VITE_GQL_ENDPOINT,
       cache: new InMemoryCache(),
-      headers: !!token
+      headers: token
         ? {
             Authorization: `Bearer ${token}`,
           }

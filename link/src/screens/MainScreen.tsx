@@ -115,7 +115,7 @@ export default function MainScreen() {
 
       target.long_url.value = "";
       target.title.value = "";
-      if (!!target.short_url.value) {
+      if (target.short_url.value) {
         setIsShortUrlFilled(false);
       }
       target.short_url.value = "";

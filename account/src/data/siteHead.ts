@@ -16,7 +16,7 @@ export default class SiteHead {
 
   static set title(title: string | undefined) {
     if (title) {
-      this._setTitle(`${title} - ${this.__defaultTitle}`);
+      this._setTitle(`${title} | ${this.__defaultTitle}`);
     } else {
       this._setTitle(this.__defaultTitle);
     }
