@@ -8,7 +8,7 @@ import PasswordTextField from "../../components/form/PasswordTextField";
 import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import SiteHead from "../../data/siteHead";
 import SitePath from "../../data/sitePath";
-import { saveCookie } from "../../helpers/cookie";
+import { deleteCookie, saveCookie } from "../../helpers/cookie";
 import showGqlError from "../../helpers/showGqlError";
 
 export default function SignInScreen() {
@@ -68,6 +68,7 @@ export default function SignInScreen() {
         redirect += `token=${result.data.signIn.token}`;
         window.location.replace(redirect);
       } else {
+        deleteCookie("token");
         saveCookie({ key: "token", value: result.data.signIn.token });
         GqlClient.update();
         navigate(SitePath.homePath, { replace: true });

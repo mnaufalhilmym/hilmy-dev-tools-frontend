@@ -1,8 +1,10 @@
 export function readCookie(key: string) {
   return document.cookie
     .split(";")
+    .map((row) => row.trim())
     .find((row) => row.startsWith(key))
-    ?.split("=")?.[1];
+    ?.split("=")?.[1]
+    .trim();
 }
 
 export function saveCookie(cookie: {
