@@ -266,7 +266,7 @@ export default function MainLinksScreen() {
     <>
       <div class="w-full h-full flex flex-col">
         <div class="px-4 pt-4 sm:pt-1">
-          <span class="text-2xl">Links</span>
+          <span class="text-2xl">Your Links</span>
         </div>
         <div class="relative h-full mt-4 sm:border-t">
           <div class="absolute h-full w-full flex">
