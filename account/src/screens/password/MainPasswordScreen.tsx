@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client/core";
-import { Link, useNavigate } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import { createRenderEffect, createSignal, Show } from "solid-js";
 import toast from "solid-toast";
 import GqlClient from "../../api/gqlClient";
@@ -22,9 +22,6 @@ export default function MainPasswordScreen() {
 
   async function changePassword(
     event: Event & {
-      submitter: HTMLElement;
-    } & {
-      currentTarget: HTMLFormElement;
       target: Element;
     }
   ) {
@@ -82,9 +79,9 @@ export default function MainPasswordScreen() {
     <div class="min-w-screen min-h-screen flex sm:items-center">
       <div class="w-full max-w-md mx-auto p-6 sm:p-10 sm:border-2 rounded-lg">
         <div class="flex items-center gap-x-2">
-          <Link href={SitePath.homePath} class="flex">
+          <A href={SitePath.homePath} class="flex">
             <ArrowBackIcon />
-          </Link>
+          </A>
           <div>
             <h1 class="text-2xl text-center">Password</h1>
           </div>

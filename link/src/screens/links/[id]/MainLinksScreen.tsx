@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client/core";
 import { createWindowSize } from "@solid-primitives/resize-observer";
-import { Link, useNavigate, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import moment from "moment";
 import { createRenderEffect, createSignal, For, Show } from "solid-js";
 import toast from "solid-toast";
@@ -296,7 +296,7 @@ export default function MainLinksScreen() {
     return (
       <For each={links()} fallback={<LinksFallback />}>
         {(link) => (
-          <Link
+          <A
             href={`${SitePath.linksPath}/${link.id}`}
             class="block p-2"
             classList={{ "sm:bg-teal-100": params.id === link.id }}
@@ -327,7 +327,7 @@ export default function MainLinksScreen() {
                 </span>
               </div>
             </div>
-          </Link>
+          </A>
         )}
       </For>
     );
@@ -422,7 +422,7 @@ export default function MainLinksScreen() {
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
             <div class="min-w-0 flex-1">
               <Show when={isEditing() !== "short_url"}>
-                <Link
+                <A
                   href={selectedLink()!.longUrl}
                   rel="noopener noreferrer"
                   target="_blank"
@@ -430,7 +430,7 @@ export default function MainLinksScreen() {
                 >
                   {import.meta.env.VITE_SITE_SHORT_URL_RESOLVER_DOMAIN}/
                   {selectedLink()!.shortUrl}
-                </Link>
+                </A>
               </Show>
               <Show when={isEditing() === "short_url"}>
                 <div class="px-2 py-[1px] flex items-center border border-teal-500 rounded">
@@ -498,14 +498,14 @@ export default function MainLinksScreen() {
             <span class="hidden sm:block flex pt-[1px]">
               <SuBdirectoryArrowRightIcon />
             </span>
-            <Link
+            <A
               href={selectedLink()!.longUrl}
               rel="noopener noreferrer"
               target="_blank"
               class="truncate"
             >
               {selectedLink()!.longUrl}
-            </Link>
+            </A>
           </div>
         </div>
       </Show>
@@ -552,9 +552,9 @@ export default function MainLinksScreen() {
               <div class="mt-3">
                 <span class="block text-center">
                   Click the{" "}
-                  <Link href={SitePath.homePath} class="text-teal-500">
+                  <A href={SitePath.homePath} class="text-teal-500">
                     + Create
-                  </Link>{" "}
+                  </A>{" "}
                   button in the menu to get started.
                 </span>
               </div>

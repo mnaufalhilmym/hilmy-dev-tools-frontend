@@ -1,6 +1,6 @@
 import { Show } from "solid-js";
 import Logout from "../icon/Logout";
-import { Link } from "@solidjs/router";
+import { A } from "@solidjs/router";
 import ManageAccounts from "../icon/ManageAccounts";
 import getBgProfilePicture from "../../helpers/getBgProfilePicture";
 import LoadingSkeleton from "../loading/LoadingSkeleton";
@@ -51,7 +51,7 @@ export default function ModalAccount(props: Props) {
                 </div>
               </div>
               <div class="ml-20 my-2 flex flex-wrap gap-2">
-                <Link
+                <A
                   href={import.meta.env.VITE_SITE_ACCOUNT_URL}
                   rel="noopener noreferrer"
                   target="_black"
@@ -60,7 +60,7 @@ export default function ModalAccount(props: Props) {
                 >
                   <ManageAccounts />
                   <span>Manage</span>
-                </Link>
+                </A>
                 <button
                   type="button"
                   onclick={signOut}

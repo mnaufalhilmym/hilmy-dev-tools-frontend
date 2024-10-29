@@ -1,17 +1,25 @@
-import {
-  Outlet,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "@solidjs/router";
-import { createRenderEffect } from "solid-js";
+import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
+import { createRenderEffect, JSX } from "solid-js";
 import SitePath from "../data/sitePath";
 import { readCookie } from "../helpers/cookie";
+import Head from "../components/head/Head";
+import { Toaster } from "solid-toast";
+import SiteHead from "../data/siteHead";
+import GqlClient from "../api/gqlClient";
 
-export default function MainWrapper() {
+interface Props {
+  children?: JSX.Element;
+}
+
+export default function MainWrapper(props: Props) {
   const location = useLocation();
   const [params, setParams] = useSearchParams<{ redirect?: string }>();
   const navigate = useNavigate();
+
+  createRenderEffect(() => {
+    SiteHead.init();
+    GqlClient.init();
+  });
 
   createRenderEffect(() => {
     const token = readCookie("token");
@@ -36,5 +44,11 @@ export default function MainWrapper() {
     }
   });
 
-  return <Outlet />;
+  return (
+    <>
+      <Head />
+      {props.children}
+      <Toaster position="top-right" gutter={8} />
+    </>
+  );
 }

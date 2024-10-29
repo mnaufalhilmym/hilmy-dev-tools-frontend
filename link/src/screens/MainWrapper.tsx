@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client/core";
-import { Link, Outlet, useLocation, useSearchParams } from "@solidjs/router";
-import { createRenderEffect, createSignal, Show } from "solid-js";
+import { A, useLocation, useSearchParams } from "@solidjs/router";
+import { createRenderEffect, createSignal, JSX, Show } from "solid-js";
 import GqlClient from "../api/gqlClient";
 import AddIcon from "../components/icon/AddIcon";
 import LinkIcon from "../components/icon/LinkIcon";
@@ -11,8 +11,14 @@ import showGqlError from "../helpers/showGqlError";
 import Account from "../types/account.type";
 import Apprepo from "../types/apprepo.type";
 import Header from "../components/header/Header";
+import Head from "../components/head/Head";
+import { Toaster } from "solid-toast";
 
-export default function MainWrapper() {
+interface Props {
+  children?: JSX.Element;
+}
+
+export default function MainWrapper(props: Props) {
   const location = useLocation();
   const [params, setParams] = useSearchParams<{ token?: string }>();
   const [accountAndApps, setAccountAndApps] = createSignal<{
@@ -58,6 +64,11 @@ export default function MainWrapper() {
   }
 
   createRenderEffect(() => {
+    SiteHead.init();
+    GqlClient.init();
+  });
+
+  createRenderEffect(() => {
     let token: string | undefined;
     if (params.token) {
       token = params.token;
@@ -94,13 +105,14 @@ export default function MainWrapper() {
 
   return (
     <>
+      <Head />
+
       <Header
         apprepos={accountAndApps()?.apprepos}
         email={accountAndApps()?.account.email}
       />
-
       <div class="fixed top-16 w-full md:hidden flex gap-x-2 border-b">
-        <Link href={SitePath.homePath} class="px-4">
+        <A href={SitePath.homePath} class="px-4">
           <div class="relative py-2">
             <div
               class="flex items-center gap-x-1 hover:text-teal-500"
@@ -119,8 +131,8 @@ export default function MainWrapper() {
               </div>
             </Show>
           </div>
-        </Link>
-        <Link href={SitePath.linksPath} class="px-4">
+        </A>
+        <A href={SitePath.linksPath} class="px-4">
           <div class="relative py-2">
             <div
               class="flex items-center gap-x-1 hover:text-teal-500"
@@ -141,12 +153,11 @@ export default function MainWrapper() {
               </div>
             </Show>
           </div>
-        </Link>
+        </A>
       </div>
-
       <div class="h-screen pt-[105px] md:pt-16 flex">
         <div class="hidden md:block h-full pr-4 border-r space-y-2">
-          <Link
+          <A
             href={SitePath.homePath}
             class="w-full py-2 pl-8 pr-16 flex items-center gap-x-2 hover:bg-teal-50 rounded-r-full"
             classList={{
@@ -157,8 +168,8 @@ export default function MainWrapper() {
               <AddIcon />
             </span>
             <span>Create</span>
-          </Link>
-          <Link
+          </A>
+          <A
             href={SitePath.linksPath}
             class="w-full py-2 pl-8 pr-16 flex items-center gap-x-2 hover:bg-teal-50 rounded-r-full"
             classList={{
@@ -169,13 +180,13 @@ export default function MainWrapper() {
               <LinkIcon />
             </span>
             <span>Links</span>
-          </Link>
+          </A>
         </div>
 
-        <div class="w-full overflow-y-auto">
-          <Outlet />
-        </div>
+        <div class="w-full overflow-y-auto">{props.children}</div>
       </div>
+
+      <Toaster position="top-right" gutter={8} />
     </>
   );
 }

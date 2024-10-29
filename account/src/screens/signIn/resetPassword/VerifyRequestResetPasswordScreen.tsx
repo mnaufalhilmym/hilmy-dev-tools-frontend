@@ -30,9 +30,6 @@ export default function VerifyRequestResetPasswordScreen() {
 
   async function verifyResetPassword(
     event: Event & {
-      submitter: HTMLElement;
-    } & {
-      currentTarget: HTMLFormElement;
       target: Element;
     }
   ) {

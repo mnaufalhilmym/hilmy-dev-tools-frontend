@@ -30,9 +30,6 @@ export default function SignUpVerifyScreen() {
 
   async function verifySignUp(
     event: Event & {
-      submitter: HTMLElement;
-    } & {
-      currentTarget: HTMLFormElement;
       target: Element;
     }
   ) {

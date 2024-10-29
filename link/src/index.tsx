@@ -2,8 +2,10 @@
 import { render } from "solid-js/web";
 
 import "./index.css";
-import App from "./App";
-import { Router } from "@solidjs/router";
+import { RouteDefinition, Router } from "@solidjs/router";
+import { lazy } from "solid-js";
+import getLastScreenPath from "./helpers/getLastScreenPath";
+import SitePath from "./data/sitePath";
 
 const root = document.getElementById("root");
 
@@ -13,11 +15,21 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(
-  () => (
-    <Router>
-      <App />
-    </Router>
-  ),
-  root!
-);
+const routes: RouteDefinition[] = [
+  {
+    path: SitePath.homePath,
+    component: lazy(() => import("./screens/MainWrapper")),
+    children: [
+      {
+        path: "/",
+        component: lazy(() => import("./screens/MainScreen")),
+      },
+      {
+        path: `${getLastScreenPath(SitePath.linksPath)}/:id?`,
+        component: lazy(() => import("./screens/links/[id]/MainLinksScreen")),
+      },
+    ],
+  },
+];
+
+render(() => <Router>{routes}</Router>, root!);

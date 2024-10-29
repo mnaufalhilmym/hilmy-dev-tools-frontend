@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client/core";
-import { Link, useNavigate } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import { createRenderEffect, createSignal, Show } from "solid-js";
 import GqlClient from "../../api/gqlClient";
 import ConfirmButton from "../../components/button/ConfirmButton";
@@ -21,9 +21,6 @@ export default function SignInScreen() {
 
   async function signIn(
     event: Event & {
-      submitter: HTMLElement;
-    } & {
-      currentTarget: HTMLFormElement;
       target: Element;
     }
   ) {
@@ -101,21 +98,21 @@ export default function SignInScreen() {
               </div>
             </div>
             <div class="mt-4">
-              <Link
+              <A
                 href={SitePath.requestResetPasswordPath}
                 class="-ml-1 px-1 py-0.5 active:bg-teal-100 text-teal-500 active:text-teal-600 rounded"
               >
                 Reset password
-              </Link>
+              </A>
             </div>
           </div>
           <div class="mt-10 -ml-1.5 flex items-center justify-between">
-            <Link
+            <A
               href={SitePath.signUpPath}
               class="px-1.5 py-1.5 text-teal-500 hover:text-teal-600 hover:bg-teal-50 active:bg-teal-100 rounded transition-colors duration-200"
             >
               Create account
-            </Link>
+            </A>
             <ConfirmButton type="submit">
               <Show
                 when={!isLoadingSignIn()}

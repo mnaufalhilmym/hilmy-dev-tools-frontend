@@ -1,4 +1,4 @@
-FROM node:18-bullseye-slim AS base
+FROM node:22-bookworm-slim AS base
 
 FROM base AS deps
 WORKDIR /app
@@ -15,7 +15,7 @@ RUN npm run build
 FROM base AS deps-prod
 WORKDIR /app
 COPY --from=deps /app/package.json .
-RUN npm i vite@^4.3.9
+RUN npm i serve@^14.2.4
 
 FROM base AS runner
 WORKDIR /app

@@ -53,9 +53,6 @@ export default function MainScreen() {
 
   async function createShortUrl(
     event: Event & {
-      submitter: HTMLElement;
-    } & {
-      currentTarget: HTMLFormElement;
       target: Element;
     }
   ) {

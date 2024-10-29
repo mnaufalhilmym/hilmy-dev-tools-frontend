@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client/core";
-import { Link, useSearchParams } from "@solidjs/router";
+import { A, useSearchParams } from "@solidjs/router";
 import { createRenderEffect, createSignal, Show } from "solid-js";
 import GqlClient from "../api/gqlClient";
 import LoadingSkeleton from "../components/loading/LoadingSkeleton";
@@ -157,18 +157,18 @@ export default function MainScreen() {
             </button>
           </div>
           <div class="mt-6">
-            <Link
+            <A
               href={SitePath.emailPath}
               class="w-fit mx-auto block text-center"
             >
               Change email
-            </Link>
-            <Link
+            </A>
+            <A
               href={SitePath.passwordPath}
               class="w-fit mx-auto block text-center"
             >
               Change password
-            </Link>
+            </A>
           </div>
           <div class="mt-8">
             <button

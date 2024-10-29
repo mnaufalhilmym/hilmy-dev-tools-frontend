@@ -1,4 +1,4 @@
-import { Link } from "@solidjs/router";
+import { A } from "@solidjs/router";
 import { For, Show } from "solid-js";
 import Apprepo from "../../types/apprepo.type";
 import styles from "./ModalApps.module.css";
@@ -21,20 +21,24 @@ export default function ModalApps(props: Props) {
               <For each={props.apprepos}>
                 {(app) => (
                   <div class="w-24 p-2 aspect-square">
-                    <Link
+                    <A
                       href={app.link}
                       rel="noopener noreferrer"
                       target="_blank"
                       onclick={props.onClickApp}
-                      class="w-full h-full p-2 flex flex-col hover:bg-teal-100/50 active:bg-teal-100/80 rounded-lg"
+                      class="group w-full h-full p-2 flex flex-col hover:bg-teal-100/50 active:bg-teal-100/80 rounded-lg"
                     >
                       <div class="min-h-0 min-w-0 flex-1 w-fit mx-auto flex items-center justify-center">
-                        <img src={app.icon} alt={app.name} />
+                        <img
+                          src={app.icon}
+                          alt={app.name}
+                          class="w-full h-full"
+                        />
                       </div>
-                      <span class="flex-none block text-center truncate">
+                      <span class="block text-center truncate group-hover:whitespace-normal text-sm leading-3 break-all">
                         {app.name}
                       </span>
-                    </Link>
+                    </A>
                   </div>
                 )}
               </For>

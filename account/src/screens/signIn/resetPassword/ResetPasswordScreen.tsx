@@ -31,9 +31,6 @@ export default function ResetPasswordScreen() {
 
   async function resetPassword(
     event: Event & {
-      submitter: HTMLElement;
-    } & {
-      currentTarget: HTMLFormElement;
       target: Element;
     }
   ) {

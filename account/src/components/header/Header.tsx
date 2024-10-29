@@ -1,4 +1,4 @@
-import { Link } from "@solidjs/router";
+import { A } from "@solidjs/router";
 import AppsIcon from "../icon/AppsIcon";
 import ModalApps from "./ModalApps";
 import ModalAccount from "./ModalAccount";
@@ -37,11 +37,11 @@ export default function Header(props: Props) {
   return (
     <div class="fixed z-50 top-0 w-full">
       <div class="py-3 px-3.5 flex justify-between items-center">
-        <Link href={SitePath.homePath}>
+        <A href={SitePath.homePath}>
           <h1 class="px-1.5 font-bold text-xl">
             {import.meta.env.VITE_SITE_NAME}
           </h1>
-        </Link>
+        </A>
         <div class="flex gap-x-2 items-center">
           <button
             type="button"

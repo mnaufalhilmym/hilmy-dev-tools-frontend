@@ -30,9 +30,6 @@ export default function EmailVerifyScreen() {
 
   async function verifyEmail(
     event: Event & {
-      submitter: HTMLElement;
-    } & {
-      currentTarget: HTMLFormElement;
       target: Element;
     }
   ) {
